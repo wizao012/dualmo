@@ -518,19 +518,41 @@ footer small{margin-top:34px}
   white-space:nowrap;
 }
 .hero-brand{
-  width:min(49vw,720px)!important;
-  padding:clamp(10px,1vw,16px) clamp(14px,1.4vw,22px);
-  border:1px solid rgba(255,255,255,.5);
-  border-radius:clamp(18px,2vw,30px);
-  background:linear-gradient(135deg,rgba(255,255,255,.98),rgba(235,246,255,.9));
-  box-shadow:0 22px 55px rgba(0,7,28,.3),inset 0 1px 0 #fff,0 0 42px rgba(49,135,255,.12);
-  backdrop-filter:blur(14px) saturate(1.2);
+  width:min(43vw,640px)!important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  backdrop-filter:none;
 }
-.hero-brand img{
-  display:block;
+.hero-brand-type{
+  display:flex;
   width:100%;
-  height:auto;
-  filter:drop-shadow(0 5px 10px rgba(5,25,68,.12));
+  flex-direction:column;
+  align-items:center;
+  color:#fff;
+  filter:drop-shadow(0 7px 18px rgba(0,0,0,.48));
+}
+.hero-brand-type strong{
+  font-family:"Arial Black","Avenir Next","Helvetica Neue",sans-serif;
+  font-size:clamp(64px,7.5vw,126px);
+  line-height:.78;
+  font-weight:950;
+  letter-spacing:-.075em;
+  white-space:nowrap;
+}
+.hero-brand-type small{
+  margin-top:clamp(14px,1.35vw,23px);
+  font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif;
+  font-size:clamp(20px,2.2vw,37px);
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.16em;
+  white-space:nowrap;
 }
 .hero-copy-line{
   display:block;
@@ -593,14 +615,18 @@ footer small{margin-top:34px}
     line-height:.92;
   }
   .hero-brand{
-    width:min(76vw,520px)!important;
-    padding:9px 13px;
-    border-radius:18px;
-    box-shadow:0 14px 38px rgba(0,7,28,.32),inset 0 1px 0 #fff;
+    width:min(84vw,560px)!important;
+    justify-content:center;
+    padding:0;
+    border-radius:0;
+    box-shadow:none;
   }
+  .hero-brand-type{width:100%}
+  .hero-brand-type strong{font-size:clamp(54px,16.4vw,92px)}
+  .hero-brand-type small{margin-top:9px;font-size:clamp(16px,4.8vw,27px)}
   .hero-copy-line{
     position:absolute;
-    top:21.5%;
+    top:18.8%;
     left:7.5%;
     width:85%;
     height:3px;
@@ -624,8 +650,10 @@ footer small{margin-top:34px}
 
 @media(max-width:390px){
   .hero-copy h1{font-size:clamp(47px,14.8vw,58px)}
-  .hero-brand{width:78vw!important;padding:8px 11px;border-radius:16px}
-  .hero-copy-line{top:21%}
+  .hero-brand{width:86vw!important;padding:0;border-radius:0}
+  .hero-brand-type strong{font-size:16.2vw}
+  .hero-brand-type small{font-size:4.7vw}
+  .hero-copy-line{top:18.5%}
   .hero-message{bottom:4.8%;gap:7px}
   .hero-lead{font-size:clamp(24px,7.1vw,28px)}
   .hero-unlimited{font-size:clamp(32px,9.7vw,38px)}
@@ -663,6 +691,83 @@ footer small{margin-top:34px}
 @media(max-width:700px){
   .hero:before{inset:68px 0 auto;height:calc(100% - 68px)}
   .hero picture img{animation-duration:12s}
+}
+
+/* Animated communication trails layered over the text-free FV artwork. */
+.hero-data-flow{
+  position:absolute;
+  z-index:1;
+  inset:82px 0 0;
+  overflow:hidden;
+  pointer-events:none;
+  mix-blend-mode:screen;
+}
+.data-stream{
+  position:absolute;
+  bottom:-4%;
+  width:64%;
+  height:35%;
+  border-radius:50%;
+  opacity:.82;
+  filter:drop-shadow(0 0 8px currentColor);
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 14%,#000 82%,transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0%,#000 14%,#000 82%,transparent 100%);
+}
+.data-stream:before,
+.data-stream:after{
+  content:"";
+  position:absolute;
+  inset:20% -12%;
+  border-top:2px solid currentColor;
+  border-radius:50%;
+  opacity:.64;
+}
+.data-stream:after{inset:32% -8%;opacity:.34}
+.data-stream-blue{left:22%;color:#1388ff;transform:rotate(-11deg)}
+.data-stream-orange{right:-7%;color:#ff6a22;transform:rotate(13deg)}
+.data-stream i{
+  position:absolute;
+  top:20%;
+  left:-18%;
+  width:clamp(95px,12vw,210px);
+  height:3px;
+  border-radius:999px;
+  background:linear-gradient(90deg,transparent,currentColor 38%,#fff 72%,transparent);
+  box-shadow:0 0 8px currentColor,0 0 18px currentColor;
+  animation:heroDataStream 3.4s linear infinite;
+}
+.data-stream i:nth-child(2){top:31%;animation-delay:-1.15s;animation-duration:4.1s;opacity:.76}
+.data-stream i:nth-child(3){top:43%;animation-delay:-2.35s;animation-duration:3.8s;opacity:.5}
+.data-stream-orange i{animation-direction:reverse}
+.data-pulse{
+  position:absolute;
+  width:9px;
+  aspect-ratio:1;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 8px 3px currentColor,0 0 24px 8px currentColor;
+  animation:heroDataPulse 2.8s ease-in-out infinite;
+}
+.data-pulse-blue{right:27.8%;top:44.5%;color:#168cff}
+.data-pulse-orange{right:17.2%;top:44.5%;color:#ff6422;animation-delay:-1.4s}
+@keyframes heroDataStream{
+  0%{transform:translate3d(0,0,0) scaleX(.72);opacity:0}
+  14%{opacity:.9}
+  82%{opacity:.82}
+  100%{transform:translate3d(72vw,0,0) scaleX(1.08);opacity:0}
+}
+@keyframes heroDataPulse{
+  0%,100%{transform:scale(.55);opacity:.28}
+  48%{transform:scale(1.15);opacity:.95}
+}
+@media(max-width:700px){
+  .hero-data-flow{inset:68px 0 0}
+  .data-stream{bottom:21%;width:92%;height:22%}
+  .data-stream-blue{left:-18%;transform:rotate(-18deg)}
+  .data-stream-orange{right:-20%;transform:rotate(18deg)}
+  .data-stream i{height:2px;animation-duration:3s}
+  .data-pulse-blue{right:58%;top:44%}
+  .data-pulse-orange{right:27%;top:44%}
 }
 
 /* Keep the copyright flush with the end of the page. */
@@ -704,33 +809,40 @@ footer small{
 .apple-glyph{
   position:relative;
   display:block;
-  width:31px;
-  height:34px;
-  margin-top:6px;
-  border-radius:46% 46% 52% 52% / 55% 55% 45% 45%;
-  background:#fff;
-  transform:rotate(-5deg);
+  width:35px;
+  height:40px;
+  margin-top:3px;
 }
 .apple-glyph:before{
   content:"";
   position:absolute;
-  width:14px;
-  height:8px;
-  top:-8px;
-  left:16px;
-  border-radius:100% 0 100% 0;
+  width:15px;
+  height:9px;
+  top:0;
+  left:18px;
+  border-radius:100% 0 90% 0;
   background:#fff;
-  transform:rotate(-28deg);
+  transform:rotate(-34deg);
 }
 .apple-glyph:after{
   content:"";
   position:absolute;
-  width:13px;
-  height:15px;
-  right:-8px;
-  top:6px;
+  width:12px;
+  height:13px;
+  right:-4px;
+  top:13px;
   border-radius:50%;
   background:#111827;
+  z-index:2;
+}
+.apple-glyph>span{
+  position:absolute;
+  left:1px;
+  bottom:0;
+  width:34px;
+  height:31px;
+  background:#fff;
+  clip-path:polygon(5% 27%,16% 10%,35% 4%,50% 13%,64% 4%,83% 10%,96% 29%,94% 54%,82% 83%,66% 100%,50% 92%,35% 100%,19% 84%,7% 58%);
 }
 
 .application-form{

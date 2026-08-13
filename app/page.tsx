@@ -177,16 +177,19 @@ export default function Home() {
           <source media="(max-width: 700px)" srcSet="/fv-mobile-textless.webp" />
           <img src="/fv-desktop-textless.webp" width="1671" height="941" alt="2つのSIMを1台のスマートフォンで利用するDUALMOのイメージ" fetchPriority="high" />
         </picture>
+        <div className="hero-data-flow" aria-hidden="true">
+          <span className="data-stream data-stream-blue"><i /><i /><i /></span>
+          <span className="data-stream data-stream-orange"><i /><i /><i /></span>
+          <span className="data-pulse data-pulse-blue" />
+          <span className="data-pulse data-pulse-orange" />
+        </div>
         <div className="hero-copy">
           <h1 id="hero-title" className="hero-brand">
             <span className="sr-only">DUALMO（デュアルモ）</span>
-            <img
-              src="/brand/dualmo-logo-horizontal-approved-b-hq.webp"
-              width="1218"
-              height="351"
-              alt=""
-              aria-hidden="true"
-            />
+            <span className="hero-brand-type" aria-hidden="true">
+              <strong>DUALMO</strong>
+              <small>デュアルモ</small>
+            </span>
           </h1>
           <span className="hero-copy-line" aria-hidden="true" />
           <div className="hero-message">
@@ -281,7 +284,7 @@ export default function Home() {
         </div>
         <div className="os-grid">
           <article className="ios-card">
-            <div className="os-head"><span className="os-symbol apple" aria-hidden="true"><i className="apple-glyph" /></span><div><small>FOR iPHONE</small><h3>iPhoneの設定</h3></div></div>
+            <div className="os-head"><span className="os-symbol apple" aria-hidden="true"><i className="apple-glyph"><span /></i></span><div><small>FOR iPHONE</small><h3>iPhoneの設定</h3></div></div>
             <ol>
               <li><span>01</span><i><Settings2 /></i><div><b>「設定」を開く</b><p>モバイル通信をタップ</p></div></li>
               <li><span>02</span><i><CardSim /></i><div><b>2つのSIMをオン</b><p>両方の回線を有効にする</p></div></li>

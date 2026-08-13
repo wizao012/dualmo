@@ -37,7 +37,10 @@ test("keeps the hero logo responsive and motion accessible", async () => {
 
   assert.match(page, /className="hero-brand"/);
   assert.match(page, /className="sr-only">DUALMO（デュアルモ）/);
+  assert.match(page, /className="hero-data-flow"/);
+  assert.doesNotMatch(page, /className="hero-brand-symbol"/);
   assert.match(css, /@keyframes heroVisualDrift/);
   assert.match(css, /@keyframes heroGlowDrift/);
+  assert.match(css, /@keyframes heroDataStream/);
   assert.match(css, /prefers-reduced-motion:reduce/);
 });
