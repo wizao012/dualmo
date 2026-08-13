@@ -178,7 +178,16 @@ export default function Home() {
           <img src="/fv-desktop-textless.webp" width="1671" height="941" alt="2つのSIMを1台のスマートフォンで利用するDUALMOのイメージ" fetchPriority="high" />
         </picture>
         <div className="hero-copy">
-          <h1 id="hero-title">デュアルモ</h1>
+          <h1 id="hero-title" className="hero-brand">
+            <span className="sr-only">DUALMO（デュアルモ）</span>
+            <img
+              src="/brand/dualmo-logo-horizontal-approved-b-hq.webp"
+              width="1218"
+              height="351"
+              alt=""
+              aria-hidden="true"
+            />
+          </h1>
           <span className="hero-copy-line" aria-hidden="true" />
           <div className="hero-message">
             <p className="hero-lead">電話番号は、そのまま。</p>
