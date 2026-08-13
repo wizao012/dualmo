@@ -517,6 +517,21 @@ footer small{margin-top:34px}
   letter-spacing:-.085em;
   white-space:nowrap;
 }
+.hero-brand{
+  width:min(49vw,720px)!important;
+  padding:clamp(10px,1vw,16px) clamp(14px,1.4vw,22px);
+  border:1px solid rgba(255,255,255,.5);
+  border-radius:clamp(18px,2vw,30px);
+  background:linear-gradient(135deg,rgba(255,255,255,.98),rgba(235,246,255,.9));
+  box-shadow:0 22px 55px rgba(0,7,28,.3),inset 0 1px 0 #fff,0 0 42px rgba(49,135,255,.12);
+  backdrop-filter:blur(14px) saturate(1.2);
+}
+.hero-brand img{
+  display:block;
+  width:100%;
+  height:auto;
+  filter:drop-shadow(0 5px 10px rgba(5,25,68,.12));
+}
 .hero-copy-line{
   display:block;
   width:93%;
@@ -577,9 +592,15 @@ footer small{margin-top:34px}
     font-size:clamp(50px,15.2vw,106px);
     line-height:.92;
   }
+  .hero-brand{
+    width:min(76vw,520px)!important;
+    padding:9px 13px;
+    border-radius:18px;
+    box-shadow:0 14px 38px rgba(0,7,28,.32),inset 0 1px 0 #fff;
+  }
   .hero-copy-line{
     position:absolute;
-    top:12.2%;
+    top:21.5%;
     left:7.5%;
     width:85%;
     height:3px;
@@ -603,11 +624,45 @@ footer small{margin-top:34px}
 
 @media(max-width:390px){
   .hero-copy h1{font-size:clamp(47px,14.8vw,58px)}
-  .hero-copy-line{top:12%}
+  .hero-brand{width:78vw!important;padding:8px 11px;border-radius:16px}
+  .hero-copy-line{top:21%}
   .hero-message{bottom:4.8%;gap:7px}
   .hero-lead{font-size:clamp(24px,7.1vw,28px)}
   .hero-unlimited{font-size:clamp(32px,9.7vw,38px)}
   .hero-price strong{font-size:clamp(58px,17.3vw,68px)}
+}
+
+/* Subtle cinematic motion for the text-free FV visual. */
+.hero picture{overflow:hidden;background:var(--deep)}
+.hero picture img{
+  will-change:transform;
+  transform:scale(1.012);
+  animation:heroVisualDrift 14s cubic-bezier(.45,.05,.55,.95) infinite alternate;
+}
+.hero:before{
+  content:"";
+  position:absolute;
+  z-index:1;
+  inset:82px 0 0;
+  pointer-events:none;
+  opacity:.48;
+  background:
+    radial-gradient(circle at 32% 72%,rgba(18,108,255,.2),transparent 24%),
+    radial-gradient(circle at 84% 66%,rgba(255,94,43,.15),transparent 22%);
+  background-size:118% 118%;
+  animation:heroGlowDrift 11s ease-in-out infinite alternate;
+}
+@keyframes heroVisualDrift{
+  from{transform:scale(1.012) translate3d(-.18%,0,0)}
+  to{transform:scale(1.027) translate3d(.32%,-.22%,0)}
+}
+@keyframes heroGlowDrift{
+  from{background-position:0 50%;opacity:.34}
+  to{background-position:100% 45%;opacity:.58}
+}
+@media(max-width:700px){
+  .hero:before{inset:68px 0 auto;height:calc(100% - 68px)}
+  .hero picture img{animation-duration:12s}
 }
 
 /* Keep the copyright flush with the end of the page. */
