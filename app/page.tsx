@@ -1,25 +1,24 @@
 import type { Metadata } from "next";
+import ApplicationForm from "./ApplicationForm";
 import {
+  Apple,
   ArrowRight,
   BadgeJapaneseYen,
   CardSim,
   Check,
   ChevronDown,
   CircleCheck,
+  CircleDollarSign,
   CreditCard,
   Download,
-  Gauge,
-  Globe2,
   Infinity as InfinityIcon,
   MessageSquareText,
-  MonitorSmartphone,
   Phone,
-  Play,
   RadioTower,
   Settings2,
   ShieldCheck,
   Smartphone,
-  Sun,
+  TriangleAlert,
   Wifi,
   WifiOff,
 } from "lucide-react";
@@ -91,11 +90,24 @@ const howToSchema = {
   ],
 };
 
-function Logo() {
+function Logo({ reversed = false }: { reversed?: boolean }) {
   return (
     <span className="logo" aria-label="DUALMO デュアルモ">
-      <img src="/brand/dualmo-logo-horizontal-approved-b-hq.webp" width="1218" height="351" alt="DUALMO デュアルモ" />
+      <img
+        src={reversed ? "/brand/dualmo-logo-white-hq.png" : "/brand/dualmo-logo-color-hq.png"}
+        width="1920"
+        height={reversed ? "587" : "530"}
+        alt="DUALMO デュアルモ"
+      />
     </span>
+  );
+}
+
+function SignalRibbon({ side = "right", warm = false }: { side?: "left" | "right"; warm?: boolean }) {
+  return (
+    <div className={`section-signal ${side}${warm ? " warm" : ""}`} aria-hidden="true">
+      <span /><span /><span />
+    </div>
   );
 }
 
@@ -112,10 +124,14 @@ function BigCta({ variant = "blue", number }: { variant?: "blue" | "orange" | "d
   return (
     <section className={`big-cta ${variant}`} aria-label="お申し込み案内">
       <div className="cta-orbit" aria-hidden="true"><i /><i /><i /></div>
+      <div className="cta-glass-flare" aria-hidden="true"><i /><i /></div>
       <div className="big-cta-copy">
         <span className="cta-kicker">START DUALMO</span>
         <p>今の電話番号は、そのまま。</p>
-        <h2><span>日中データ無制限</span><strong>月額 2,490<small>円（税込）</small></strong></h2>
+        <h2>
+          <span>日中データ無制限</span>
+          <strong><span className="cta-monthly">月額</span><b className="cta-price-number">2,490</b><small>円（税込）</small></strong>
+        </h2>
       </div>
       <CtaButton label="今すぐ申し込む" light={variant !== "orange"} />
       <span className="cta-number" aria-hidden="true">{number}</span>
@@ -124,15 +140,15 @@ function BigCta({ variant = "blue", number }: { variant?: "blue" | "orange" | "d
 }
 
 const problems = [
-  { icon: Gauge, title: "ギガが足りない", text: "動画やSNSで、月末前に速度制限。" },
-  { icon: BadgeJapaneseYen, title: "無制限は高い", text: "大容量プランにすると料金が上がる。" },
-  { icon: WifiOff, title: "通信が不安定", text: "外出先でも安定した回線を使いたい。" },
+  { icon: TriangleAlert, visual: "data", title: "ギガが足りない", text: "動画やSNSで、月末前に速度制限。", status: "残りデータ 0GB" },
+  { icon: CircleDollarSign, visual: "price", title: "無制限は高い", text: "大容量プランにすると料金が上がる。", status: "毎月の請求が負担" },
+  { icon: WifiOff, visual: "signal", title: "通信が不安定", text: "外出先でも安定した回線を使いたい。", status: "遅くてイライラ" },
 ];
 
 const features = [
-  { no: "01", icon: BadgeJapaneseYen, label: "LOW PRICE", title: "安い", accent: "2,490", unit: "円（税込）/月", text: "わかりやすいワンプラン。初期費用は1,000円（税込）。", tone: "price-feature" },
-  { no: "02", icon: ShieldCheck, label: "RELIABLE", title: "安心", accent: "ドコモ", unit: "回線", text: "全国のドコモ回線対応エリアで、高速・安定通信。", tone: "network-feature" },
-  { no: "03", icon: InfinityIcon, label: "UNLIMITED", title: "大容量", accent: "日中", unit: "データ無制限", text: "8:00〜18:00頃。動画もテザリングも容量を気にせず。", tone: "data-feature" },
+  { no: "01", icon: BadgeJapaneseYen, label: "LOW PRICE", title: "安い", prefix: "月額", accent: "2,490", unit: "円（税込）", text: "わかりやすいワンプラン。初期費用は1,000円（税込）。", tone: "price-feature" },
+  { no: "02", icon: ShieldCheck, label: "RELIABLE", title: "安心", prefix: "全国対応", accent: "docomo", unit: "回線", text: "全国のドコモ回線対応エリアで、高速・安定通信。", tone: "network-feature" },
+  { no: "03", icon: InfinityIcon, label: "UNLIMITED", title: "大容量", prefix: "日中データ", accent: "無制限", unit: "", text: "動画もテザリングも容量を気にせず。", tone: "data-feature" },
 ];
 
 const applySteps = [
@@ -142,9 +158,66 @@ const applySteps = [
   { icon: CircleCheck, title: "利用スタート", text: "データ回線を選べば完了" },
 ];
 
+const highlights = [
+  {
+    icon: InfinityIcon,
+    eyebrow: "DAYTIME UNLIMITED",
+    title: <>データ通信<strong>無制限。</strong></>,
+    text: "動画もテザリングも、データ容量を気にせず楽しめます。",
+    tone: "unlimited",
+    visual: <><span className="highlight-visual-icon"><InfinityIcon /></span><b>UNLIMITED</b></>,
+  },
+  {
+    icon: RadioTower,
+    eyebrow: "DOCOMO NETWORK",
+    title: <>つながる、<strong>安心。</strong></>,
+    text: "全国のドコモ回線対応エリアで、高速・安定したデータ通信を利用できます。",
+    tone: "network",
+    visual: <><span className="highlight-visual-icon"><span className="highlight-signal-bars"><i /><i /><i /><i /></span></span><b>docomo</b></>,
+  },
+  {
+    icon: BadgeJapaneseYen,
+    eyebrow: "SIMPLE PRICE",
+    title: <>大容量を、<strong>シンプルに。</strong></>,
+    text: "迷わないワンプラン。今の契約を活かしながら通信費を見直せます。",
+    tone: "price",
+    visual: <><span className="highlight-visual-icon simple-yen">¥</span><b>2,490<small>円（税込）</small></b></>,
+  },
+] as const;
+
+function HighlightsSection() {
+  return (
+    <section className="highlights section" aria-labelledby="highlights-title">
+      <div className="section-intro highlights-intro">
+        <span className="section-kicker light">ABOUT DUALMO</span>
+        <h2 id="highlights-title">DUALMOとは？</h2>
+        <p>難しいSIMの話を、3つのポイントだけで。</p>
+      </div>
+      <div className="highlights-scroll-stage" data-horizontal-stage>
+        <div className="highlights-sticky">
+          <div className="highlights-track" role="region" aria-label="DUALMOの3つの特徴" data-horizontal-track>
+            {highlights.map(({ icon: Icon, eyebrow, title, text, tone, visual }) => (
+              <article className={`highlight-card ${tone}`} key={eyebrow}>
+                <div className="highlight-card-copy">
+                  <span className="highlight-eyebrow"><i><Icon /></i>{eyebrow}</span>
+                  <h3>{title}</h3>
+                  <p>{text}</p>
+                </div>
+                <div className="highlight-card-visual" aria-hidden="true">{visual}</div>
+              </article>
+            ))}
+          </div>
+          <div className="highlights-progress" aria-hidden="true"><i data-horizontal-progress /></div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   return (
-    <main>
+    <main className="liquid-site">
+      <div className="ambient-liquid" aria-hidden="true"><i /><i /><i /></div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
@@ -173,9 +246,10 @@ export default function Home() {
       </header>
 
       <section className="hero" id="top" aria-labelledby="hero-title">
+        <div className="hero-mobile-fill" aria-hidden="true"><img src="/fv-mobile-cgi-v3.jpg" alt="" /></div>
         <picture>
-          <source media="(max-width: 700px)" srcSet="/fv-mobile-textless.webp" />
-          <img src="/fv-desktop-textless.webp" width="1671" height="941" alt="2つのSIMを1台のスマートフォンで利用するDUALMOのイメージ" fetchPriority="high" />
+          <source media="(max-width: 700px)" srcSet="/fv-mobile-cgi-v3.jpg" />
+          <img src="/fv-desktop-cgi-v3.jpg" width="1672" height="941" alt="青い音声SIMとオレンジ色のDUALMO eSIMを1台で利用するスマートフォン" fetchPriority="high" />
         </picture>
         <div className="hero-data-flow" aria-hidden="true">
           <span className="data-stream data-stream-blue"><i /><i /><i /></span>
@@ -208,17 +282,24 @@ export default function Home() {
 
       <BigCta variant="blue" number="01" />
 
+      <HighlightsSection />
+
       <section className="problems section" id="about">
+        <SignalRibbon side="right" />
         <div className="section-intro centered">
-          <span className="section-kicker">DO YOU HAVE THESE PROBLEMS?</span>
-          <h2><span className="line">スマホの通信、</span><span className="line accent">こんなお悩みありませんか？</span></h2>
+          <span className="section-kicker">PROBLEMS</span>
+          <h2 className="problem-heading"><span className="line problem-heading-prefix">スマホの通信、</span><span className="line accent problem-heading-question"><span>こんなお悩み</span><span>ありませんか？</span></span></h2>
           <p>料金は抑えたい。でも、ギガも通信品質も妥協したくない。</p>
         </div>
         <div className="problem-grid">
-          {problems.map(({ icon: Icon, title, text }, index) => (
+          {problems.map(({ icon: StatusIcon, visual, title, text, status }, index) => (
             <article key={title}>
               <span className="problem-no">0{index + 1}</span>
-              <i><Icon aria-hidden="true" /></i>
+              <div className={`problem-icon-panel ${visual}`} aria-hidden="true">
+                <span className="problem-icon-ripple" />
+                <i><StatusIcon /></i>
+              </div>
+              <span className="problem-status">{status}</span>
               <h3>{title}</h3>
               <p>{text}</p>
             </article>
@@ -238,53 +319,66 @@ export default function Home() {
           </ul>
         </div>
         <div className="solution-figure" aria-label="音声SIMとDUALMOを1台のスマートフォンで使う図">
+          <input className="visual-toggle-input" type="checkbox" id="dual-sim-demo" data-scroll-sim-toggle />
+          <label className="visual-toggle" htmlFor="dual-sim-demo"><span>音声</span><span>データ</span></label>
           <div className="signal-ring ring-a" /><div className="signal-ring ring-b" />
           <div className="phone-shell">
             <span className="phone-camera" />
             <div className="phone-screen">
               <span className="screen-label">DUAL SIM</span>
               <div><i className="blue"><Phone /></i><span><small>いまの音声SIM</small><b>電話・SMS</b></span></div>
-              <em>＋</em>
-              <div><i className="data-sim"><CardSim aria-hidden="true" /></i><span><small>DUALMO</small><b>データ通信</b></span></div>
+              <em className="dualmo-plus">＋</em>
+              <div className="dualmo-line"><i className="data-sim"><CardSim aria-hidden="true" /></i><span><small>DUALMO</small><b>データ通信</b></span></div>
             </div>
           </div>
-          <span className="float-chip chip-a"><Phone />番号そのまま</span>
-          <span className="float-chip chip-b"><Wifi />日中無制限</span>
+          <span className="float-chip chip-a"><Phone /><span>番号そのまま</span></span>
+          <span className="float-chip chip-b"><Wifi /><span>日中無制限</span></span>
+        </div>
+      </section>
+
+      <section className="visual-story mechanism-story" aria-labelledby="mechanism-story-title">
+        <div className="visual-story-inner">
+          <div className="visual-story-copy">
+            <span className="visual-story-kicker">DUAL SIM ARCHITECTURE</span>
+            <h2 id="mechanism-story-title"><span>2つの回線を、</span><strong>1台に。</strong></h2>
+            <p>通話は今の音声SIM。データ通信はDUALMO eSIM。</p>
+          </div>
+          <picture className="visual-story-media">
+            <source media="(max-width: 700px)" srcSet="/visuals/dualmo-esim-cg-mobile-v2.jpg" />
+            <img src="/visuals/dualmo-esim-cg-v2.jpg" width="1672" height="941" loading="lazy" alt="青い音声SIMとオレンジ色に発光するDUALMO eSIMが1台のスマートフォンにつながるイメージ" />
+          </picture>
         </div>
       </section>
 
       <section className="features section" id="features">
+        <SignalRibbon side="left" warm />
         <div className="section-intro">
           <span className="section-kicker">WHY DUALMO?</span>
-          <h2><span className="line">選ばれる理由は、</span><span className="line accent">3つだけ。</span></h2>
+          <h2 className="two-line-heading"><span className="line">DUALMO</span><span className="line accent">選ばれる理由</span></h2>
         </div>
         <div className="feature-grid">
-          {features.map(({ no, icon: Icon, label, title, accent, unit, text, tone }) => (
+          {features.map(({ no, icon: Icon, label, title, prefix, accent, unit, text, tone }) => (
             <article className={tone} key={no}>
               <div className="feature-top"><span>{no} / {label}</span><i><Icon /></i></div>
               <h3>{title}</h3>
-              <div className="feature-value"><strong>{accent}</strong><b>{unit}</b></div>
+              <div className="feature-value"><span className="feature-prefix">{prefix}</span><strong>{accent}</strong>{unit && <b>{unit}</b>}</div>
               <p>{text}</p>
               <div className="feature-line" aria-hidden="true"><i /><i /><i /><i /><i /></div>
             </article>
           ))}
         </div>
-        <div className="feature-scenes" aria-label="DUALMOの利用シーン">
-          <figure><img src="/use-video.jpg" alt="移動中に動画を視聴する利用シーン" loading="lazy" /><figcaption><Play />動画視聴</figcaption></figure>
-          <figure><img src="/use-work.jpg" alt="テザリングでパソコンを使う利用シーン" loading="lazy" /><figcaption><MonitorSmartphone />テザリング</figcaption></figure>
-          <figure><img src="/use-travel.jpg" alt="外出先で安定通信を使う利用シーン" loading="lazy" /><figcaption><Globe2 />外出・旅行</figcaption></figure>
-        </div>
       </section>
 
       <section className="how section" id="how">
+        <SignalRibbon side="right" />
         <div className="section-intro centered">
           <span className="section-kicker">HOW TO USE</span>
-          <h2><span className="line">使い方は、</span><span className="line accent">スマホの設定だけ。</span></h2>
+          <h2 className="two-line-heading"><span className="line">スマホの設定は、</span><span className="line accent">超シンプル</span></h2>
           <p>難しいSIMの差し替えは不要。iPhoneもAndroidも、データ回線にDUALMOを選びます。</p>
         </div>
         <div className="os-grid">
           <article className="ios-card">
-            <div className="os-head"><span className="os-symbol apple" aria-hidden="true"><i className="apple-glyph"><span /></i></span><div><small>FOR iPHONE</small><h3>iPhoneの設定</h3></div></div>
+            <div className="os-head"><span className="os-symbol apple" aria-hidden="true"><Apple /></span><div><small>FOR iPHONE</small><h3>iPhoneの設定</h3></div></div>
             <ol>
               <li><span>01</span><i><Settings2 /></i><div><b>「設定」を開く</b><p>モバイル通信をタップ</p></div></li>
               <li><span>02</span><i><CardSim /></i><div><b>2つのSIMをオン</b><p>両方の回線を有効にする</p></div></li>
@@ -304,6 +398,7 @@ export default function Home() {
       </section>
 
       <section className="flow section" id="flow">
+        <SignalRibbon side="left" warm />
         <div className="section-intro">
           <span className="section-kicker light">APPLICATION FLOW</span>
           <h2><span className="line">お申し込みから</span><span className="line orange">最短4ステップ。</span></h2>
@@ -324,6 +419,7 @@ export default function Home() {
       <BigCta variant="orange" number="02" />
 
       <section className="faq section" id="faq">
+        <SignalRibbon side="right" />
         <div className="section-intro centered">
           <span className="section-kicker">FAQ</span>
           <h2><span className="line">よくあるご質問。</span></h2>
@@ -340,88 +436,11 @@ export default function Home() {
 
       <BigCta variant="dark" number="03" />
 
-      <section className="application-form section" id="application-form" aria-labelledby="application-title">
-        <div className="section-intro centered">
-          <span className="section-kicker">APPLICATION FORM</span>
-          <h2 id="application-title"><span className="line">DUALMO</span><span className="line accent">お申し込みフォーム</span></h2>
-          <p>約5分で入力できます。現在の電話番号・携帯キャリアはそのままでお申し込みいただけます。</p>
-        </div>
-
-        <div className="application-shell">
-          <div className="application-summary" aria-label="お申し込みプラン">
-            <span>お申し込みプラン</span>
-            <strong>DUALMO</strong>
-            <p>日中データ無制限 <b>月額2,490円（税込）</b></p>
-            <small>初期費用 1,000円（税込）／ドコモ回線</small>
-          </div>
-
-          <form className="application-fields">
-            <fieldset>
-              <legend><span>01</span>ご利用内容</legend>
-              <div className="form-grid two-columns">
-                <label>ご希望のSIMタイプ<span>必須</span>
-                  <select name="simType" required defaultValue="esim">
-                    <option value="esim">eSIM（おすすめ）</option>
-                    <option value="physical">物理SIM</option>
-                  </select>
-                </label>
-                <label>現在の携帯キャリア<span>必須</span>
-                  <select name="carrier" required defaultValue="">
-                    <option value="" disabled>選択してください</option>
-                    <option>docomo</option><option>au</option><option>SoftBank</option>
-                    <option>楽天モバイル</option><option>格安SIM・その他</option>
-                  </select>
-                </label>
-                <label className="full-width">ご利用予定のスマートフォン<span>必須</span>
-                  <input name="device" type="text" placeholder="例：iPhone 16 / Google Pixel 9" required />
-                </label>
-              </div>
-            </fieldset>
-
-            <fieldset>
-              <legend><span>02</span>ご契約者さま情報</legend>
-              <div className="form-grid two-columns">
-                <label>姓<span>必須</span><input name="familyName" autoComplete="family-name" type="text" placeholder="山田" required /></label>
-                <label>名<span>必須</span><input name="givenName" autoComplete="given-name" type="text" placeholder="太郎" required /></label>
-                <label>セイ（カナ）<span>必須</span><input name="familyNameKana" type="text" placeholder="ヤマダ" required /></label>
-                <label>メイ（カナ）<span>必須</span><input name="givenNameKana" type="text" placeholder="タロウ" required /></label>
-                <label className="full-width">生年月日<span>必須</span><input name="birthDate" autoComplete="bday" type="date" required /></label>
-              </div>
-            </fieldset>
-
-            <fieldset>
-              <legend><span>03</span>ご住所・ご連絡先</legend>
-              <div className="form-grid two-columns">
-                <label>郵便番号<span>必須</span><input name="postalCode" autoComplete="postal-code" inputMode="numeric" type="text" placeholder="123-4567" required /></label>
-                <label>都道府県<span>必須</span>
-                  <select name="prefecture" autoComplete="address-level1" required defaultValue="">
-                    <option value="" disabled>選択してください</option>
-                    {[
-                      "北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"
-                    ].map((prefecture) => <option key={prefecture}>{prefecture}</option>)}
-                  </select>
-                </label>
-                <label className="full-width">市区町村・番地<span>必須</span><input name="address" autoComplete="address-line1" type="text" placeholder="渋谷区〇〇 1-2-3" required /></label>
-                <label className="full-width">建物名・部屋番号<span className="optional">任意</span><input name="address2" autoComplete="address-line2" type="text" placeholder="DUALMOビル 101号室" /></label>
-                <label>電話番号<span>必須</span><input name="tel" autoComplete="tel" inputMode="tel" type="tel" placeholder="090-1234-5678" required /></label>
-                <label>メールアドレス<span>必須</span><input name="email" autoComplete="email" inputMode="email" type="email" placeholder="dualmo@example.jp" required /></label>
-              </div>
-            </fieldset>
-
-            <fieldset className="agreement-fieldset">
-              <legend><span>04</span>ご確認</legend>
-              <label className="agreement-check"><input type="checkbox" required /><span>契約期間24か月、課金開始は発送ベース、解約金は月額料金1か月分であることを確認しました。</span></label>
-              <label className="agreement-check"><input type="checkbox" required /><span>利用規約・重要事項説明・プライバシーポリシーに同意します。</span></label>
-            </fieldset>
-
-            <button className="form-submit" type="button"><span><small>入力内容を確認して</small>確認画面へ進む</span><ArrowRight aria-hidden="true" /></button>
-            <p className="form-provisional">※現在はフォーム項目・画面デザイン確認用の暫定版です。送信・決済機能は本番連携時に有効化します。</p>
-          </form>
-        </div>
-      </section>
+      <ApplicationForm />
 
       <footer>
-        <a className="footer-logo-link" href="#top" aria-label="DUALMO トップへ"><Logo /></a>
+        <span className="footer-signal" aria-hidden="true"><i /><i /><i /></span>
+        <a className="footer-logo-link" href="#top" aria-label="DUALMO トップへ"><Logo reversed /></a>
         <p>ドコモ回線のデータ専用SIM・サブ回線</p>
         <small>© 2026 DUALMO. All Rights Reserved.</small>
       </footer>
@@ -430,6 +449,7 @@ export default function Home() {
         <span><small>日中データ無制限</small><b>月額 2,490円</b></span>
         <a href="#application-form">申し込む<ArrowRight /></a>
       </div>
+      <script src="/dualmo-experience.js" defer />
     </main>
   );
 }

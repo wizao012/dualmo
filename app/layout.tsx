@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./tone-system.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://dualmo-unlimited.pirorion0318.chatgpt.site"),
