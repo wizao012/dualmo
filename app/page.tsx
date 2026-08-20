@@ -193,22 +193,17 @@ function HighlightsSection() {
         <h2 id="highlights-title">DUALMOとは？</h2>
         <p>難しいSIMの話を、3つのポイントだけで。</p>
       </div>
-      <div className="highlights-scroll-stage" data-horizontal-stage>
-        <div className="highlights-sticky">
-          <div className="highlights-track" role="region" aria-label="DUALMOの3つの特徴" data-horizontal-track>
-            {highlights.map(({ icon: Icon, eyebrow, title, text, tone, visual }) => (
-              <article className={`highlight-card ${tone}`} key={eyebrow}>
-                <div className="highlight-card-copy">
-                  <span className="highlight-eyebrow"><i><Icon /></i>{eyebrow}</span>
-                  <h3>{title}</h3>
-                  <p>{text}</p>
-                </div>
-                <div className="highlight-card-visual" aria-hidden="true">{visual}</div>
-              </article>
-            ))}
-          </div>
-          <div className="highlights-progress" aria-hidden="true"><i data-horizontal-progress /></div>
-        </div>
+      <div className="highlights-track highlights-grid" role="list" aria-label="DUALMOの3つの特徴">
+        {highlights.map(({ icon: Icon, eyebrow, title, text, tone, visual }) => (
+          <article className={`highlight-card ${tone}`} key={eyebrow} role="listitem">
+            <div className="highlight-card-copy">
+              <span className="highlight-eyebrow"><i><Icon /></i>{eyebrow}</span>
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </div>
+            <div className="highlight-card-visual" aria-hidden="true">{visual}</div>
+          </article>
+        ))}
       </div>
     </section>
   );

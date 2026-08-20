@@ -50,13 +50,7 @@ export default function ApplicationForm() {
             <p className="step-form-guide"><span>STEP 1 / 4</span><b>ご利用内容を入力してください</b></p>
             <legend><span>01</span>ご利用内容</legend>
             <div className="form-grid two-columns">
-              <label>ご希望のSIMタイプ<span>必須</span>
-                <select name="simType" required defaultValue="esim">
-                  <option value="esim">eSIM（おすすめ）</option>
-                  <option value="physical">物理SIM</option>
-                </select>
-              </label>
-              <label>現在の携帯キャリア<span>必須</span>
+              <label className="full-width">現在の携帯キャリア<span>必須</span>
                 <select name="carrier" required defaultValue="">
                   <option value="" disabled>選択してください</option>
                   <option>docomo</option><option>au</option><option>SoftBank</option>

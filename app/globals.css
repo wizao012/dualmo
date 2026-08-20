@@ -3488,3 +3488,156 @@ main.liquid-site{overflow:visible}
   .hero picture img{animation:none!important;transform:none!important}
   .hero-data-flow:before,.hero-data-flow:after{animation:none!important}
 }
+
+/* 2026-08-20: static ABOUT grid and real-device width containment. */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+main.liquid-site{width:100%;max-width:100vw;overflow:hidden}
+.section{max-width:100vw;overflow-x:hidden}
+.highlights{
+  padding-bottom:clamp(82px,9vw,145px);
+  overflow:hidden;
+}
+.highlights .highlights-intro{
+  position:relative;
+  top:auto;
+  margin-bottom:clamp(30px,4vw,54px);
+  padding-block:0;
+}
+.highlights-track.highlights-grid{
+  width:100%;
+  max-width:1240px;
+  height:auto;
+  margin-inline:auto;
+  padding:0;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-auto-flow:row;
+  grid-auto-columns:auto;
+  gap:18px;
+  overflow:visible;
+  scroll-snap-type:none;
+  touch-action:auto;
+  transform:none!important;
+}
+.highlights-grid .highlight-card{
+  width:100%;
+  min-width:0;
+  min-height:430px;
+  height:auto;
+  max-height:none;
+  padding:clamp(25px,2.5vw,36px);
+  display:grid;
+  grid-template-rows:auto 1fr;
+  align-items:center;
+  gap:clamp(18px,2vw,28px);
+}
+.highlights-grid .highlight-card-copy,
+.highlights-grid .highlight-card-visual{
+  min-width:0;
+  max-width:100%;
+}
+.highlights-grid .highlight-card h3{font-size:clamp(34px,3.3vw,52px)}
+.highlights-grid .highlight-card p{font-size:clamp(13px,1.05vw,16px)}
+.highlights-grid .highlight-card-visual,
+.highlights-grid .highlight-card.unlimited .highlight-card-visual{min-height:128px}
+.highlights-grid .highlight-card.unlimited .highlight-card-visual>b,
+.highlights-grid .highlight-card.network .highlight-card-visual>b,
+.highlights-grid .highlight-card.price .highlight-card-visual>b{font-size:clamp(34px,3.5vw,52px)}
+
+@media(max-width:1020px) and (min-width:701px){
+  .highlights-track.highlights-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .highlights-grid .highlight-card{min-height:390px;padding:22px 18px}
+  .highlights-grid .highlight-card h3{font-size:clamp(30px,3.8vw,40px)}
+}
+
+@media(max-width:700px){
+  html,body{
+    width:100%;
+    max-width:100%;
+    overflow-x:hidden;
+  }
+  main.liquid-site,
+  .section,
+  .solution,
+  .how,
+  .application-form{
+    width:100%;
+    max-width:100vw;
+    min-width:0;
+    overflow-x:hidden;
+  }
+  .section-intro,
+  .section-intro.centered,
+  .solution-copy,
+  .solution-figure,
+  .os-grid,
+  .os-grid>article,
+  .application-shell{
+    width:100%;
+    min-width:0;
+    max-width:100%;
+  }
+  .section>.section-signal{max-width:100%;contain:paint}
+  .solution-figure{overflow:hidden;contain:layout paint}
+  .solution-figure .signal-ring{max-width:none}
+  .solution-copy>p,
+  .how .section-intro>p,
+  .application-form .section-intro>p,
+  .os-grid li p,
+  .os-grid li b{
+    min-width:0;
+    max-width:100%;
+    white-space:normal;
+    word-break:normal;
+    overflow-wrap:anywhere;
+  }
+  .os-grid>article{overflow:hidden}
+  .os-grid li{grid-template-columns:27px 46px minmax(0,1fr);min-width:0}
+  .os-grid li>div{min-width:0}
+  .how .section-intro h2.two-line-heading,
+  .application-form .section-intro h2{
+    min-width:0;
+    max-width:100%;
+  }
+  .how .section-intro h2.two-line-heading{font-size:clamp(31px,10.1vw,43px)}
+  .application-form .section-intro h2{font-size:clamp(27px,8.7vw,36px)}
+
+  .highlights{padding-top:58px;padding-bottom:72px}
+  .highlights .highlights-intro{
+    position:relative;
+    top:auto;
+    margin-bottom:28px;
+    padding:0;
+  }
+  .highlights-track.highlights-grid{
+    width:calc(100% - 32px);
+    grid-template-columns:minmax(0,1fr);
+    gap:14px;
+    padding:0;
+  }
+  .highlights-grid .highlight-card{
+    min-height:0;
+    height:auto;
+    max-height:none;
+    padding:22px 18px 18px;
+    gap:14px;
+  }
+  .highlights-grid .highlight-card-copy{align-self:start}
+  .highlights-grid .highlight-card h3{margin-top:14px;font-size:clamp(34px,10vw,42px)}
+  .highlights-grid .highlight-card p{font-size:13px;line-height:1.6}
+  .highlights-grid .highlight-card-visual,
+  .highlights-grid .highlight-card.unlimited .highlight-card-visual{min-height:112px}
+  .highlights-grid .highlight-card.unlimited .highlight-card-visual>b,
+  .highlights-grid .highlight-card.network .highlight-card-visual>b,
+  .highlights-grid .highlight-card.price .highlight-card-visual>b{font-size:clamp(37px,11vw,44px)}
+}
+
+@media(max-width:340px){
+  .solution-figure{width:100%;margin:0;transform:none}
+  .solution-copy>p,
+  .how .section-intro>p,
+  .application-form .section-intro>p{font-size:13px}
+  .how .section-intro h2.two-line-heading{font-size:30px}
+  .application-form .section-intro h2{font-size:26px}
+  .application-form .section-intro h2 .line{white-space:normal}
+}
