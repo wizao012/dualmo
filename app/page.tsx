@@ -436,8 +436,7 @@ export default function Home() {
       <footer>
         <span className="footer-signal" aria-hidden="true"><i /><i /><i /></span>
         <a className="footer-logo-link" href="#top" aria-label="DUALMO トップへ"><Logo reversed /></a>
-        <p>ドコモ回線のデータ専用SIM・サブ回線</p>
-        <small>© 2026 DUALMO. All Rights Reserved.</small>
+        <small>© 株式会社どこよりも. All Rights Reserved.</small>
       </footer>
 
       <div className="mobile-cta">

@@ -32,6 +32,8 @@ test("server-renders the finished DUALMO landing page", async () => {
   assert.match(html, /日中データ無制限/);
   assert.match(html, /application\/ld\+json/);
   assert.doesNotMatch(html, /codex-preview|Building your site/);
+  assert.match(html, /© 株式会社どこよりも\. All Rights Reserved\./);
+  assert.doesNotMatch(html, /© 2026 DUALMO\. All Rights Reserved\./);
 });
 
 test("keeps the hero logo responsive and motion accessible", async () => {
@@ -82,6 +84,38 @@ test("removes the SIM type selector from the application form", async () => {
   assert.doesNotMatch(form, /ご希望のSIMタイプ|name="simType"/);
 });
 
+test("links the final agreement to the current terms and privacy policy", async () => {
+  const form = await readFile(new URL("../app/ApplicationForm.tsx", import.meta.url), "utf8");
+  assert.match(form, /https:\/\/terms\.012grp\.co\.jp\/terms_pdf\/dokoyorimo\/dualmo_tac\//);
+  assert.match(form, /https:\/\/terms\.012grp\.co\.jp\/privacy\/dokoyorimo_p\//);
+  assert.match(form, />利用規約<\/a>・<a[^>]+>プライバシーポリシー<\/a>に同意します。/);
+  assert.doesNotMatch(form, /重要事項説明/);
+});
+
+test("renders an application confirmation step before submission", async () => {
+  const form = await readFile(new URL("../app/ApplicationForm.tsx", import.meta.url), "utf8");
+  assert.match(form, /お申し込み内容の確認/);
+  assert.match(form, /"送信する"/);
+  assert.match(form, /現在の携帯キャリア/);
+  assert.match(form, /ご利用予定のスマートフォン/);
+  assert.match(form, /入力内容を修正する/);
+  assert.match(form, /fetch\("\/api\/application"/);
+});
+
+test("prepares Resend and Gmail delivery for customer and lead emails without logging personal data", async () => {
+  const worker = await readFile(new URL("../worker/application.ts", import.meta.url), "utf8");
+  assert.match(worker, /LEAD_NOTIFICATION_RECIPIENTS/);
+  assert.doesNotMatch(worker, /@012grp\.co\.jp/);
+  assert.match(worker, /お申し込みありがとうございます/);
+  assert.match(worker, /DUALMO 新規リード通知/);
+  assert.match(worker, /https:\/\/api\.resend\.com\/emails/);
+  assert.match(worker, /Idempotency-Key/);
+  assert.match(worker, /https:\/\/oauth2\.googleapis\.com\/token/);
+  assert.match(worker, /https:\/\/gmail\.googleapis\.com\/gmail\/v1\/users\/me\/messages\/send/);
+  assert.match(worker, /EMAIL_REPLY_TO/);
+  assert.match(worker, /EMAIL_NOT_CONFIGURED/);
+  assert.doesNotMatch(worker, /console\.(?:log|error)\([^\n]*payload/);
+});
 test("loads the approved restrained color system", async () => {
   const [layout, tone] = await Promise.all([
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
