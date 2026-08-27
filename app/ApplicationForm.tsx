@@ -220,7 +220,7 @@ export default function ApplicationForm() {
             <div className="confirmation-actions">
               <button className="confirmation-edit" type="button" onClick={editApplication}><ArrowLeft aria-hidden="true" />入力内容を修正する</button>
               <button className="form-submit confirmation-submit" type="submit" disabled={isSubmitting}>
-                <span><small>株式会社どこよりもへ</small>{isSubmitting ? "送信中…" : "送信する"}</span><Send aria-hidden="true" />
+                <span>{isSubmitting ? "送信中…" : "送信する"}</span><Send aria-hidden="true" />
               </button>
             </div>
           </form>
