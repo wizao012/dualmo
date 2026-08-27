@@ -5,7 +5,7 @@ import "./tone-system.css";
 export const metadata: Metadata = {
   metadataBase: new URL("https://dualmo-unlimited.pirorion0318.chatgpt.site"),
   title: "デュアルモ｜今の電話番号はそのまま、日中データ無制限",
-  description: "今の音声SIMにデータ通信専用eSIMを追加するだけ。docomo回線の日中データ無制限を月額2,490円で。",
+  description: "今の音声SIMにデータ通信専用eSIMを追加するだけ。初期費用0円・初月無料。docomo回線の9:00〜18:00データ無制限を月額2,490円（税抜）で。",
   keywords: ["デュアルモ", "デュアルSIM", "eSIM", "データ無制限", "docomo回線"],
   robots: { index: true, follow: true },
   icons: {
@@ -18,13 +18,13 @@ export const metadata: Metadata = {
     locale: "ja_JP",
     siteName: "デュアルモ",
     title: "デュアルモ｜今の電話番号はそのまま、日中データ無制限",
-    description: "今の音声SIMにeSIMを追加するだけ。docomo回線の日中データ無制限を月額2,490円で。",
+    description: "今の音声SIMにeSIMを追加するだけ。初期費用0円・初月無料。docomo回線の9:00〜18:00データ無制限を月額2,490円（税抜）で。",
     images: [{ url: "/og-v2.webp", width: 1200, height: 675, alt: "DUALMO — 電話番号はそのまま、日中データ無制限" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "デュアルモ｜今の電話番号はそのまま、日中データ無制限",
-    description: "今の音声SIMにeSIMを追加するだけ。日中データ無制限を月額2,490円で。",
+    description: "今の音声SIMにeSIMを追加するだけ。初期費用0円・初月無料。9:00〜18:00データ無制限を月額2,490円（税抜）で。",
     images: ["/og-v2.webp"],
   },
 };
