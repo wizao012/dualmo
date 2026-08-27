@@ -107,8 +107,9 @@ function escapeHtml(value: string): string {
 function detailsText(payload: ApplicationPayload): string {
   return [
     "お申し込みプラン：DUALMO",
-    "月額料金：2,490円（税込）",
-    "初期費用：1,000円（税込）",
+    "月額料金：2,490円（税抜）／2,739円（税込）",
+    "初期費用：0円",
+    "初月料金：無料",
     `現在の携帯キャリア：${payload.carrier}`,
     `ご利用予定のスマートフォン：${payload.device}`,
     `お名前：${payload.familyName} ${payload.givenName}`,
@@ -124,8 +125,9 @@ function detailsText(payload: ApplicationPayload): string {
 function detailsHtml(payload: ApplicationPayload): string {
   const rows = [
     ["お申し込みプラン", "DUALMO"],
-    ["月額料金", "2,490円（税込）"],
-    ["初期費用", "1,000円（税込）"],
+    ["月額料金", "2,490円（税抜）／2,739円（税込）"],
+    ["初期費用", "0円"],
+    ["初月料金", "無料"],
     ["現在の携帯キャリア", payload.carrier],
     ["ご利用予定のスマートフォン", payload.device],
     ["お名前", `${payload.familyName} ${payload.givenName}`],
