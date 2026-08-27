@@ -216,7 +216,7 @@ function HighlightsSection() {
 
 export default function Home() {
   return (
-    <main className="liquid-site">
+    <main className="liquid-site" data-pricing-version="2026-08-27">
       <div className="ambient-liquid" aria-hidden="true"><i /><i /><i /></div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
