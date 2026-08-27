@@ -109,7 +109,7 @@ export default function ApplicationForm() {
         <div className="application-summary" aria-label="お申し込みプラン">
           <span>お申し込みプラン</span>
           <strong>DUALMO</strong>
-          <p>日中データ無制限 <b>月額2,490円（税込）</b></p>
+          <p>初月無料・日中データ無制限 <b>月額2,490円（税抜）</b><small>※2,739円（税込）</small></p>
         </div>
 
         {view === "input" && <>
@@ -185,7 +185,7 @@ export default function ApplicationForm() {
             <fieldset className="agreement-fieldset" id="form-step-4">
               <p className="step-form-guide"><span>STEP 4 / 4</span><b>お申し込み内容をご確認ください</b></p>
               <legend><span>04</span>ご確認</legend>
-              <label className="agreement-check"><input name="contractConfirmed" type="checkbox" required /><span><strong className="agreement-price">初期費用 1,000円（税込）/月額 2,490円（税込）</strong>契約期間24か月、課金開始は発送ベース、解約金は月額料金1か月分であることを確認しました。</span></label>
+              <label className="agreement-check"><input name="contractConfirmed" type="checkbox" required /><span><strong className="agreement-price">初期費用 0円／初月無料／月額 2,490円（税抜）<small>※2,739円（税込）</small></strong>契約期間24か月、課金開始は発送ベース、解約金は月額料金1か月分であることを確認しました。</span></label>
               <label className="agreement-check"><input name="policyAgreed" type="checkbox" required /><span><a href="https://terms.012grp.co.jp/terms_pdf/dokoyorimo/dualmo_tac/" target="_blank" rel="noopener noreferrer">利用規約</a>・<a href="https://terms.012grp.co.jp/privacy/dokoyorimo_p/" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>に同意します。</span></label>
               <button className="form-submit" type="button" onClick={showConfirmation}><span><small>入力内容を確認して</small>確認画面へ進む</span><ArrowRight aria-hidden="true" /></button>
             </fieldset>
