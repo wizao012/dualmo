@@ -100,6 +100,28 @@ test("renders an application confirmation step before submission", async () => {
   assert.match(form, /ご利用予定のスマートフォン/);
   assert.match(form, /入力内容を修正する/);
   assert.match(form, /fetch\("\/api\/application"/);
+  assert.doesNotMatch(form, /株式会社どこよりもへ/);
+});
+
+test("uses the current campaign pricing, usage note and legal footer links", async () => {
+  const [page, form, worker] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/ApplicationForm.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../worker/application.ts", import.meta.url), "utf8"),
+  ]);
+  const source = `${page}\n${form}\n${worker}`;
+  assert.match(source, /初期費用(?:：| )?0円/);
+  assert.match(source, /2,490円（税抜）/);
+  assert.match(source, /2,739円（税込）/);
+  assert.match(source, /初月無料/);
+  assert.doesNotMatch(source, /初期費用(?:：| )?1,000円/);
+  assert.match(page, /9:00〜18:00/);
+  assert.match(page, /翌日9:00まで通信速度制限/);
+  assert.match(page, /https:\/\/dokoyorimo\.net\/company\//);
+  assert.match(page, /https:\/\/dokoyorimo\.net\/tokutei\//);
+  assert.match(page, /https:\/\/dokoyorimo\.net\/clause\//);
+  assert.match(page, /https:\/\/dokoyorimo\.net\/immunity\//);
+  assert.match(page, /https:\/\/dokoyorimo\.net\/copyright\//);
 });
 
 test("prepares Resend and Gmail delivery for customer and lead emails without logging personal data", async () => {
