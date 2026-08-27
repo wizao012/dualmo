@@ -180,3 +180,5 @@ test("blends the dual-SIM CGI into the surrounding background", async () => {
   assert.match(tone, /\.mechanism-story \.visual-story-media\{[\s\S]*?border:0;[\s\S]*?box-shadow:none;/);
   assert.match(tone, /\.mechanism-story \.visual-story-media:after\{[\s\S]*?linear-gradient/);
 });
+
+// Cloudflare production build trigger: 2026-08-27
