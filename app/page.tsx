@@ -26,7 +26,7 @@ import {
 export const metadata: Metadata = {
   title: "DUALMO（デュアルモ）｜ドコモ回線のデータ専用SIM・サブ回線",
   description:
-    "今の電話番号と携帯キャリアはそのまま。ドコモ回線の日中データ通信無制限を月額2,490円（税込）で追加できるデータ専用eSIM・サブ回線です。",
+    "今の電話番号と携帯キャリアはそのまま。ドコモ回線の9:00〜18:00データ通信無制限を月額2,490円（税抜）で追加できる、初月無料のデータ専用eSIM・サブ回線です。",
 };
 
 const productSchema = {
@@ -35,27 +35,30 @@ const productSchema = {
   name: "DUALMO（デュアルモ）",
   alternateName: "デュアルモ",
   description:
-    "現在の電話番号と音声SIMを維持したまま追加できる、ドコモ回線のデータ通信専用eSIM。8:00〜18:00頃はデータ通信無制限。",
+    "現在の電話番号と音声SIMを維持したまま追加できる、ドコモ回線のデータ通信専用eSIM。9:00〜18:00はデータ通信無制限。初期費用0円、初月無料。",
   brand: { "@type": "Brand", name: "DUALMO" },
   category: "データ通信専用eSIM・サブ回線",
   areaServed: { "@type": "Country", name: "日本" },
   additionalProperty: [
-    { "@type": "PropertyValue", name: "日中データ通信", value: "8:00〜18:00頃は無制限" },
+    { "@type": "PropertyValue", name: "日中データ通信", value: "9:00〜18:00は無制限。その他の時間帯は最大10GB" },
     { "@type": "PropertyValue", name: "回線", value: "ドコモ回線" },
     { "@type": "PropertyValue", name: "電話番号", value: "現在の番号を維持" },
-    { "@type": "PropertyValue", name: "初期費用", value: "1,000円（税込）" },
+    { "@type": "PropertyValue", name: "初期費用", value: "0円" },
+    { "@type": "PropertyValue", name: "初月料金", value: "無料" },
+    { "@type": "PropertyValue", name: "月額料金", value: "2,490円（税抜）／2,739円（税込）" },
     { "@type": "PropertyValue", name: "契約期間", value: "24か月" },
   ],
   offers: {
     "@type": "Offer",
-    price: "2490",
+    price: "2739",
     priceCurrency: "JPY",
     availability: "https://schema.org/InStock",
     priceSpecification: {
       "@type": "UnitPriceSpecification",
-      price: "2490",
+      price: "2739",
       priceCurrency: "JPY",
       unitText: "月",
+      valueAddedTaxIncluded: true,
     },
   },
 };
@@ -64,7 +67,7 @@ const faqItems = [
   ["今の電話番号は変わりませんか？", "変わりません。今お使いの音声SIMはそのまま残し、データ通信用としてDUALMOを追加します。"],
   ["今の携帯キャリアを解約する必要はありますか？", "ありません。現在のキャリア契約を継続したままご利用いただけます。"],
   ["どのスマホでも使えますか？", "eSIMとデュアルSIMに対応した端末が必要です。お申し込み前に端末の対応状況をご確認ください。"],
-  ["日中データ無制限の時間帯は？", "8:00〜18:00頃が目安です。通信は全国のドコモ回線対応エリアでご利用いただけます。"],
+  ["日中データ無制限の時間帯は？", "9:00〜18:00が対象です。それ以外の時間帯は最大10GBまで利用でき、超過した場合は翌日9:00まで通信速度が制限されます。"],
   ["支払い方法と契約期間を教えてください。", "お支払いはクレジットカード、契約期間は24か月です。解約金は月額料金1か月分です。"],
 ] as const;
 
@@ -130,7 +133,9 @@ function BigCta({ variant = "blue", number }: { variant?: "blue" | "orange" | "d
         <p>今の電話番号は、そのまま。</p>
         <h2>
           <span>日中データ無制限</span>
-          <strong><span className="cta-monthly">月額</span><b className="cta-price-number">2,490</b><small>円（税込）</small></strong>
+          <strong><span className="cta-monthly">月額</span><b className="cta-price-number">2,490</b><small>円（税抜）</small></strong>
+          <small className="cta-tax-note">※2,739円（税込）</small>
+          <em className="cta-free-badge">初月無料</em>
         </h2>
       </div>
       <CtaButton label="今すぐ申し込む" light={variant !== "orange"} />
@@ -146,9 +151,9 @@ const problems = [
 ];
 
 const features = [
-  { no: "01", icon: BadgeJapaneseYen, label: "LOW PRICE", title: "安い", prefix: "月額", accent: "2,490", unit: "円（税込）", text: "わかりやすいワンプラン。初期費用は1,000円（税込）。", tone: "price-feature" },
+  { no: "01", icon: BadgeJapaneseYen, label: "LOW PRICE", title: "安い", prefix: "月額", accent: "2,490", unit: "円（税抜）", text: "初期費用0円・初月無料。※月額2,739円（税込）", tone: "price-feature" },
   { no: "02", icon: ShieldCheck, label: "RELIABLE", title: "安心", prefix: "全国対応", accent: "docomo", unit: "回線", text: "全国のドコモ回線対応エリアで、高速・安定通信。", tone: "network-feature" },
-  { no: "03", icon: InfinityIcon, label: "UNLIMITED", title: "大容量", prefix: "日中データ", accent: "無制限", unit: "", text: "動画もテザリングも容量を気にせず。", tone: "data-feature" },
+  { no: "03", icon: InfinityIcon, label: "UNLIMITED", title: "大容量", prefix: "データ通信", accent: "無制限", unit: "", text: "※データ無制限は9:00〜18:00の時間が対象となります。それ以外の時間帯は最大10GBまでご利用可能です。（超過した場合、翌日9:00まで通信速度制限となります。）", tone: "data-feature" },
 ];
 
 const applySteps = [
@@ -181,7 +186,7 @@ const highlights = [
     title: <>大容量を、<strong>シンプルに。</strong></>,
     text: "迷わないワンプラン。今の契約を活かしながら通信費を見直せます。",
     tone: "price",
-    visual: <><span className="highlight-visual-icon simple-yen">¥</span><b>2,490<small>円（税込）</small></b></>,
+    visual: <><span className="highlight-free-badge">初月無料</span><span className="highlight-visual-icon simple-yen">¥</span><b>2,490<small>円（税抜）</small></b><em>※2,739円（税込）</em></>,
   },
 ] as const;
 
@@ -264,7 +269,8 @@ export default function Home() {
           <div className="hero-message">
             <p className="hero-lead">電話番号は、そのまま。</p>
             <p className="hero-unlimited"><em>日中</em>データ無制限</p>
-            <p className="hero-price"><span>月額</span><strong>2,490</strong><small>円（税込）</small></p>
+            <span className="hero-free-badge">初月無料</span>
+            <p className="hero-price"><span>月額</span><strong>2,490</strong><small>円（税抜）<em>※2,739円（税込）</em></small></p>
           </div>
         </div>
         <div className="hero-badges" aria-label="サービスの特徴">
@@ -436,11 +442,19 @@ export default function Home() {
       <footer>
         <span className="footer-signal" aria-hidden="true"><i /><i /><i /></span>
         <a className="footer-logo-link" href="#top" aria-label="DUALMO トップへ"><Logo reversed /></a>
+        <nav className="footer-links" aria-label="運営会社・規約情報">
+          <a href="https://dokoyorimo.net/company/" target="_blank" rel="noopener noreferrer">会社概要</a>
+          <a href="https://dokoyorimo.net/tokutei/" target="_blank" rel="noopener noreferrer">特定商取引法</a>
+          <a href="https://dokoyorimo.net/clause/" target="_blank" rel="noopener noreferrer">重説・約款</a>
+          <a href="https://dokoyorimo.net/immunity/" target="_blank" rel="noopener noreferrer">免責事項</a>
+          <a href="https://terms.012grp.co.jp/privacy/dokoyorimo_p/" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>
+          <a href="https://dokoyorimo.net/copyright/" target="_blank" rel="noopener noreferrer">著作権</a>
+        </nav>
         <small>© 株式会社どこよりも. All Rights Reserved.</small>
       </footer>
 
       <div className="mobile-cta">
-        <span><small>日中データ無制限</small><b>月額 2,490円</b></span>
+        <span><small>初月無料・日中データ無制限</small><b>月額 2,490円<em>（税抜）</em></b></span>
         <a href="#application-form">申し込む<ArrowRight /></a>
       </div>
       <script src="/dualmo-experience.js" defer />
