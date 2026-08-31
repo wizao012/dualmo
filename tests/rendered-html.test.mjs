@@ -2,17 +2,35 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-async function render() {
+async function render(pathname = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
 
   return worker.fetch(
-    new Request("http://localhost/", { headers: { accept: "text/html" } }),
+    new Request(`http://localhost${pathname}`, { headers: { accept: "text/html" } }),
     { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
     { waitUntil() {}, passThroughOnException() {} },
   );
 }
+
+test("renders the DUALMO commercial law page and payment information", async () => {
+  const response = await render("/commercial-law");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /特定商取引法に基づく表記/);
+  assert.match(html, /株式会社どこよりも/);
+  assert.match(html, /HarezaTower12F/);
+  assert.match(html, /dualmo_dcsupport@dokoyorimo\.net/);
+  assert.match(html, /2,739円（税込）/);
+  assert.match(html, /payment-brands\.png/);
+  assert.match(html, /最短翌日に発送/);
+  assert.match(html, />←<\/span> TOPへ/);
+  assert.doesNotMatch(html, /LPへ戻る/);
+  assert.match(html, /運営会社・規約情報/);
+  assert.match(html, /プライバシーポリシー/);
+  assert.match(html, /Copyright © Dokoyorimo Co\.,LTD\. , All rights reserved\./);
+});
 
 test("server-renders the finished DUALMO landing page", async () => {
   const response = await render();
@@ -32,8 +50,22 @@ test("server-renders the finished DUALMO landing page", async () => {
   assert.match(html, /日中データ無制限/);
   assert.match(html, /application\/ld\+json/);
   assert.doesNotMatch(html, /codex-preview|Building your site/);
-  assert.match(html, /© 株式会社どこよりも\. All Rights Reserved\./);
+  assert.match(html, /Copyright © Dokoyorimo Co\.,LTD\. , All rights reserved\./);
   assert.doesNotMatch(html, /© 2026 DUALMO\. All Rights Reserved\./);
+});
+
+test("keeps every footer link in the current tab on both routes", async () => {
+  const [mainPage, lawPage] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/commercial-law/page.tsx", import.meta.url), "utf8"),
+  ]);
+
+  for (const source of [mainPage, lawPage]) {
+    const start = source.indexOf('aria-label="運営会社・規約情報"');
+    const footerNav = source.slice(start, source.indexOf("</nav>", start));
+    assert.ok(start >= 0);
+    assert.doesNotMatch(footerNav, /target="_blank"|rel="noopener noreferrer"/);
+  }
 });
 
 test("keeps the hero logo responsive and motion accessible", async () => {
@@ -52,6 +84,7 @@ test("keeps the hero logo responsive and motion accessible", async () => {
   assert.match(css, /@keyframes heroVisualCgiV2/);
   assert.match(css, /@keyframes heroCircuitScan/);
   assert.match(css, /\.hero-data-flow \.data-stream\{[\s\S]*?bottom:12%;[\s\S]*?opacity:\.56;/);
+  assert.match(css, /@media\(min-width:701px\) and \(max-width:1100px\)\{[\s\S]*?\.hero picture img\{[\s\S]*?height:clamp\(576px,65vw,680px\)/);
   assert.match(css, /prefers-reduced-motion:reduce/);
 });
 
@@ -103,6 +136,18 @@ test("renders an application confirmation step before submission", async () => {
   assert.doesNotMatch(form, /株式会社どこよりもへ/);
 });
 
+test("advances application steps only through validated footer actions", async () => {
+  const form = await readFile(new URL("../app/ApplicationForm.tsx", import.meta.url), "utf8");
+  assert.match(form, /const \[currentStep, setCurrentStep\]/);
+  assert.match(form, /const advanceStep =/);
+  assert.match(form, /invalidField\.reportValidity\(\)/);
+  assert.match(form, /disabled[\s\S]*?<span>STEP \{no\}<\/span>/);
+  assert.match(form, /onClick=\{\(\) => advanceStep\(2\)\}/);
+  assert.match(form, /onClick=\{\(\) => advanceStep\(3\)\}/);
+  assert.match(form, /onClick=\{\(\) => advanceStep\(4\)\}/);
+  assert.doesNotMatch(form, /className="step-toggle"|htmlFor=\{`application-step-/);
+});
+
 test("uses the current campaign pricing, usage note and legal footer links", async () => {
   const [page, form, worker] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
@@ -118,10 +163,15 @@ test("uses the current campaign pricing, usage note and legal footer links", asy
   assert.match(page, /9:00〜18:00/);
   assert.match(page, /翌日9:00まで通信速度制限/);
   assert.match(page, /https:\/\/dokoyorimo\.net\/company\//);
-  assert.match(page, /https:\/\/dokoyorimo\.net\/tokutei\//);
+  assert.match(page, /href="\/commercial-law"[^>]*>特定商取引法<\/a>/);
   assert.match(page, /https:\/\/dokoyorimo\.net\/clause\//);
   assert.match(page, /https:\/\/dokoyorimo\.net\/immunity\//);
   assert.match(page, /https:\/\/dokoyorimo\.net\/copyright\//);
+  assert.match(page, /<em>※2,739円（税込）<\/em>/);
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(css, /\.highlights-grid \.highlight-card\.price \.highlight-card-visual\{[\s\S]*?display:grid;[\s\S]*?grid-template-columns:auto auto/);
+  assert.match(css, /\.highlight-card\.price \.highlight-card-visual>em\{[\s\S]*?grid-column:1\/-1/);
+  assert.match(css, /\.data-feature-note\{[^}]*text-align:center/);
 });
 
 test("prepares Resend and Gmail delivery for customer and lead emails without logging personal data", async () => {
@@ -157,9 +207,14 @@ test("keeps the docomo feature value compact and readable", async () => {
   assert.match(tone, /\.network-feature \.feature-value strong\{[^}]*font-size:clamp\(34px,4vw,58px\)/);
 });
 
-test("centers both OS card headings", async () => {
-  const tone = await readFile(new URL("../app/tone-system.css", import.meta.url), "utf8");
+test("renders both OS card headings as centered text-only compositions", async () => {
+  const [page, tone] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/tone-system.css", import.meta.url), "utf8"),
+  ]);
   assert.match(tone, /\.os-head\{justify-content:center\}/);
+  assert.match(page, /os-head os-head-text/);
+  assert.doesNotMatch(page, /os-symbol/);
 });
 
 test("renders the refined dual-SIM visual story", async () => {
@@ -180,5 +235,3 @@ test("blends the dual-SIM CGI into the surrounding background", async () => {
   assert.match(tone, /\.mechanism-story \.visual-story-media\{[\s\S]*?border:0;[\s\S]*?box-shadow:none;/);
   assert.match(tone, /\.mechanism-story \.visual-story-media:after\{[\s\S]*?linear-gradient/);
 });
-
-// Cloudflare production build trigger: 2026-08-27

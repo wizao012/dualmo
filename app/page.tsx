@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import ApplicationForm from "./ApplicationForm";
 import {
-  Apple,
   ArrowRight,
   BadgeJapaneseYen,
   CardSim,
@@ -12,6 +11,7 @@ import {
   CreditCard,
   Download,
   Infinity as InfinityIcon,
+  JapaneseYen,
   MessageSquareText,
   Phone,
   RadioTower,
@@ -151,9 +151,25 @@ const problems = [
 ];
 
 const features = [
-  { no: "01", icon: BadgeJapaneseYen, label: "LOW PRICE", title: "安い", prefix: "月額", accent: "2,490", unit: "円（税抜）", text: "初期費用0円・初月無料。※月額2,739円（税込）", tone: "price-feature" },
+  { no: "01", icon: JapaneseYen, label: "LOW PRICE", title: "安い", prefix: "月額", accent: "2,490", unit: "円（税抜）", text: "初期費用0円・初月無料。※月額2,739円（税込）", tone: "price-feature" },
   { no: "02", icon: ShieldCheck, label: "RELIABLE", title: "安心", prefix: "全国対応", accent: "docomo", unit: "回線", text: "全国のドコモ回線対応エリアで、高速・安定通信。", tone: "network-feature" },
-  { no: "03", icon: InfinityIcon, label: "UNLIMITED", title: "大容量", prefix: "データ通信", accent: "無制限", unit: "", text: "※データ無制限は9:00〜18:00の時間が対象となります。それ以外の時間帯は最大10GBまでご利用可能です。（超過した場合、翌日9:00まで通信速度制限となります。）", tone: "data-feature" },
+  {
+    no: "03",
+    icon: InfinityIcon,
+    label: "UNLIMITED",
+    title: "大容量",
+    prefix: "データ通信",
+    accent: "無制限",
+    unit: "",
+    text: (
+      <span className="data-feature-note">
+        <span>※データ無制限は9:00〜18:00の時間が対象となります。</span>
+        <span>それ以外の時間帯は最大10GBまでご利用可能です。</span>
+        <span>（超過した場合、翌日9:00まで通信速度制限となります。）</span>
+      </span>
+    ),
+    tone: "data-feature",
+  },
 ];
 
 const applySteps = [
@@ -186,7 +202,7 @@ const highlights = [
     title: <>大容量を、<strong>シンプルに。</strong></>,
     text: "迷わないワンプラン。今の契約を活かしながら通信費を見直せます。",
     tone: "price",
-    visual: <><span className="highlight-free-badge">初月無料</span><span className="highlight-visual-icon simple-yen">¥</span><b>2,490<small>円（税抜）</small></b><em>※2,739円（税込）</em></>,
+    visual: <><span className="highlight-visual-icon simple-yen">¥</span><b>2,490<small>円（税抜）</small></b><em>※2,739円（税込）</em></>,
   },
 ] as const;
 
@@ -379,7 +395,7 @@ export default function Home() {
         </div>
         <div className="os-grid">
           <article className="ios-card">
-            <div className="os-head"><span className="os-symbol apple" aria-hidden="true"><Apple /></span><div><small>FOR iPHONE</small><h3>iPhoneの設定</h3></div></div>
+            <div className="os-head os-head-text"><div><small>APPLE · iOS</small><h3><strong>iPhone</strong><span>の設定</span></h3></div><b className="os-step-count">3 STEPS</b></div>
             <ol>
               <li><span>01</span><i><Settings2 /></i><div><b>「設定」を開く</b><p>モバイル通信をタップ</p></div></li>
               <li><span>02</span><i><CardSim /></i><div><b>2つのSIMをオン</b><p>両方の回線を有効にする</p></div></li>
@@ -387,7 +403,7 @@ export default function Home() {
             </ol>
           </article>
           <article className="android-card">
-            <div className="os-head"><span className="os-symbol android"><img src="/android-mark.svg" alt="" aria-hidden="true" /></span><div><small>FOR ANDROID</small><h3>Androidの設定</h3></div></div>
+            <div className="os-head os-head-text"><div><small>GOOGLE · ANDROID</small><h3><strong>Android</strong><span>の設定</span></h3></div><b className="os-step-count">3 STEPS</b></div>
             <ol>
               <li><span>01</span><i><Settings2 /></i><div><b>「設定」を開く</b><p>ネットワークと接続へ</p></div></li>
               <li><span>02</span><i><CardSim /></i><div><b>2つのSIMを有効化</b><p>SIMマネージャーから設定</p></div></li>
@@ -443,14 +459,14 @@ export default function Home() {
         <span className="footer-signal" aria-hidden="true"><i /><i /><i /></span>
         <a className="footer-logo-link" href="#top" aria-label="DUALMO トップへ"><Logo reversed /></a>
         <nav className="footer-links" aria-label="運営会社・規約情報">
-          <a href="https://dokoyorimo.net/company/" target="_blank" rel="noopener noreferrer">会社概要</a>
-          <a href="https://dokoyorimo.net/tokutei/" target="_blank" rel="noopener noreferrer">特定商取引法</a>
-          <a href="https://dokoyorimo.net/clause/" target="_blank" rel="noopener noreferrer">重説・約款</a>
-          <a href="https://dokoyorimo.net/immunity/" target="_blank" rel="noopener noreferrer">免責事項</a>
-          <a href="https://terms.012grp.co.jp/privacy/dokoyorimo_p/" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>
-          <a href="https://dokoyorimo.net/copyright/" target="_blank" rel="noopener noreferrer">著作権</a>
+          <a href="https://dokoyorimo.net/company/">会社概要</a>
+          <a href="/commercial-law">特定商取引法</a>
+          <a href="https://dokoyorimo.net/clause/">重説・約款</a>
+          <a href="https://dokoyorimo.net/immunity/">免責事項</a>
+          <a href="https://terms.012grp.co.jp/privacy/dokoyorimo_p/">プライバシーポリシー</a>
+          <a href="https://dokoyorimo.net/copyright/">著作権</a>
         </nav>
-        <small>© 株式会社どこよりも. All Rights Reserved.</small>
+        <small>Copyright © Dokoyorimo Co.,LTD. , All rights reserved.</small>
       </footer>
 
       <div className="mobile-cta">

@@ -17,6 +17,7 @@ const prefectures = [
 ];
 
 type FormView = "input" | "confirm" | "complete";
+type ApplicationStep = 1 | 2 | 3 | 4;
 
 function valueOf(formData: FormData, key: string): string {
   const value = formData.get(key);
@@ -51,12 +52,30 @@ export default function ApplicationForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const [view, setView] = useState<FormView>("input");
+  const [currentStep, setCurrentStep] = useState<ApplicationStep>(1);
   const [payload, setPayload] = useState<ApplicationPayload | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [submissionId, setSubmissionId] = useState("");
 
   const scrollToForm = () => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  const advanceStep = (nextStep: ApplicationStep) => {
+    const fieldset = formRef.current?.querySelector<HTMLElement>(`#form-step-${currentStep}`);
+    if (!fieldset) return;
+
+    const fields = Array.from(
+      fieldset.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input, select, textarea"),
+    );
+    const invalidField = fields.find((field) => !field.checkValidity());
+    if (invalidField) {
+      invalidField.reportValidity();
+      invalidField.focus({ preventScroll: true });
+      return;
+    }
+
+    setCurrentStep(nextStep);
+  };
 
   const showConfirmation = () => {
     const form = formRef.current;
@@ -113,22 +132,24 @@ export default function ApplicationForm() {
         </div>
 
         {view === "input" && <>
-          <input className="step-toggle" type="radio" name="application-step" id="application-step-1" defaultChecked />
-          <input className="step-toggle" type="radio" name="application-step" id="application-step-2" />
-          <input className="step-toggle" type="radio" name="application-step" id="application-step-3" />
-          <input className="step-toggle" type="radio" name="application-step" id="application-step-4" />
-
           <nav className="form-progress" aria-label="入力の進捗状況">
             {steps.map(({ no, short }) => (
-              <label key={no} htmlFor={`application-step-${no}`} aria-label={`STEP ${no} ${short}を表示`}>
+              <button
+                key={no}
+                type="button"
+                className={currentStep === no ? "is-current" : currentStep > no ? "is-complete" : ""}
+                aria-current={currentStep === no ? "step" : undefined}
+                aria-label={`STEP ${no} ${short}`}
+                disabled
+              >
                 <span>STEP {no}</span><b>{short}</b>
-              </label>
+              </button>
             ))}
           </nav>
 
           <form ref={formRef} className="application-fields step-form">
             <input className="form-honeypot" type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" />
-            <fieldset id="form-step-1">
+            <fieldset id="form-step-1" hidden={currentStep !== 1}>
               <p className="step-form-guide"><span>STEP 1 / 4</span><b>ご利用内容を入力してください</b></p>
               <legend><span>01</span>ご利用内容</legend>
               <div className="form-grid two-columns">
@@ -143,10 +164,10 @@ export default function ApplicationForm() {
                   <input name="device" type="text" maxLength={80} placeholder="例：iPhone 16 / Google Pixel 9" required />
                 </label>
               </div>
-              <label className="form-next" htmlFor="application-step-2"><span><small>入力内容を確認して</small>STEP 2へ進む</span><ArrowRight aria-hidden="true" /></label>
+              <button className="form-next" type="button" onClick={() => advanceStep(2)}><span><small>入力内容を確認して</small>STEP 2へ進む</span><ArrowRight aria-hidden="true" /></button>
             </fieldset>
 
-            <fieldset id="form-step-2">
+            <fieldset id="form-step-2" hidden={currentStep !== 2}>
               <p className="step-form-guide"><span>STEP 2 / 4</span><b>ご契約者さま情報を入力してください</b></p>
               <legend><span>02</span>ご契約者さま情報</legend>
               <div className="form-grid two-columns">
@@ -156,10 +177,10 @@ export default function ApplicationForm() {
                 <label>メイ（カナ）<span>必須</span><input name="givenNameKana" type="text" maxLength={40} placeholder="タロウ" required /></label>
                 <label className="full-width">生年月日<span>必須</span><input name="birthDate" autoComplete="bday" type="date" required /></label>
               </div>
-              <label className="form-next" htmlFor="application-step-3"><span><small>入力内容を確認して</small>STEP 3へ進む</span><ArrowRight aria-hidden="true" /></label>
+              <button className="form-next" type="button" onClick={() => advanceStep(3)}><span><small>入力内容を確認して</small>STEP 3へ進む</span><ArrowRight aria-hidden="true" /></button>
             </fieldset>
 
-            <fieldset id="form-step-3">
+            <fieldset id="form-step-3" hidden={currentStep !== 3}>
               <p className="step-form-guide"><span>STEP 3 / 4</span><b>ご住所・ご連絡先を入力してください</b></p>
               <legend><span>03</span>ご住所・ご連絡先</legend>
               <div className="form-grid two-columns">
@@ -179,10 +200,10 @@ export default function ApplicationForm() {
                 <label>電話番号<span>必須</span><input name="tel" autoComplete="tel" inputMode="tel" type="tel" maxLength={14} placeholder="090-1234-5678" required /></label>
                 <label>メールアドレス<span>必須</span><input name="email" autoComplete="email" inputMode="email" type="email" maxLength={160} placeholder="dualmo@example.jp" required /></label>
               </div>
-              <label className="form-next" htmlFor="application-step-4"><span><small>入力内容を確認して</small>STEP 4へ進む</span><ArrowRight aria-hidden="true" /></label>
+              <button className="form-next" type="button" onClick={() => advanceStep(4)}><span><small>入力内容を確認して</small>STEP 4へ進む</span><ArrowRight aria-hidden="true" /></button>
             </fieldset>
 
-            <fieldset className="agreement-fieldset" id="form-step-4">
+            <fieldset className="agreement-fieldset" id="form-step-4" hidden={currentStep !== 4}>
               <p className="step-form-guide"><span>STEP 4 / 4</span><b>お申し込み内容をご確認ください</b></p>
               <legend><span>04</span>ご確認</legend>
               <label className="agreement-check"><input name="contractConfirmed" type="checkbox" required /><span><strong className="agreement-price">初期費用 0円／初月無料／月額 2,490円（税抜）<small>※2,739円（税込）</small></strong>契約期間24か月、課金開始は発送ベース、解約金は月額料金1か月分であることを確認しました。</span></label>
