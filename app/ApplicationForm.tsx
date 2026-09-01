@@ -18,6 +18,25 @@ const prefectures = [
 
 type FormView = "input" | "confirm" | "complete";
 type ApplicationStep = 1 | 2 | 3 | 4;
+type FormFieldName = Exclude<keyof ApplicationPayload, "website"> | "contractConfirmed" | "policyAgreed";
+
+const fieldDetails: Record<FormFieldName, { label: string; step: ApplicationStep }> = {
+  carrier: { label: "現在の携帯キャリア", step: 1 },
+  device: { label: "ご利用予定のスマートフォン", step: 1 },
+  familyName: { label: "姓", step: 2 },
+  givenName: { label: "名", step: 2 },
+  familyNameKana: { label: "セイ（カナ）", step: 2 },
+  givenNameKana: { label: "メイ（カナ）", step: 2 },
+  birthDate: { label: "生年月日", step: 2 },
+  postalCode: { label: "郵便番号", step: 3 },
+  prefecture: { label: "都道府県", step: 3 },
+  address: { label: "市区町村・番地", step: 3 },
+  address2: { label: "建物名・部屋番号", step: 3 },
+  tel: { label: "電話番号", step: 3 },
+  email: { label: "メールアドレス", step: 3 },
+  contractConfirmed: { label: "契約内容の確認", step: 4 },
+  policyAgreed: { label: "利用規約・プライバシーポリシーへの同意", step: 4 },
+};
 
 function valueOf(formData: FormData, key: string): string {
   const value = formData.get(key);
@@ -40,8 +59,23 @@ function payloadFrom(form: HTMLFormElement): ApplicationPayload {
     address2: valueOf(formData, "address2"),
     tel: valueOf(formData, "tel"),
     email: valueOf(formData, "email"),
-    website: valueOf(formData, "website"),
+    website: "",
   };
+}
+
+function validationMessage(field: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement): string {
+  const name = field.name as FormFieldName;
+  const details = fieldDetails[name];
+  if (!details) return "";
+  if (field instanceof HTMLInputElement && field.type === "checkbox" && !field.checked) return `${details.label}が必要です。`;
+  const value = field.value.trim();
+  if (field.required && !value) return `${details.label}を入力してください。`;
+  if (name === "postalCode" && !/^\d{3}-?\d{4}$/.test(value)) return "郵便番号を7桁で入力してください。";
+  if (name === "tel" && !/^0\d{9,10}$/.test(value.replace(/-/g, ""))) return "電話番号を正しく入力してください。";
+  if (name === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "メールアドレスを正しく入力してください。";
+  if (name === "birthDate" && !/^\d{4}-\d{2}-\d{2}$/.test(value)) return "生年月日を入力してください。";
+  if (!field.checkValidity()) return `${details.label}を正しく入力してください。`;
+  return "";
 }
 
 function ReviewRow({ label, children }: { label: string; children: string }) {
@@ -57,29 +91,58 @@ export default function ApplicationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [submissionId, setSubmissionId] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<FormFieldName, string>>>({});
 
   const scrollToForm = () => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
-  const advanceStep = (nextStep: ApplicationStep) => {
-    const fieldset = formRef.current?.querySelector<HTMLElement>(`#form-step-${currentStep}`);
-    if (!fieldset) return;
+  const validateStep = (step: ApplicationStep): boolean => {
+    const fieldset = formRef.current?.querySelector<HTMLElement>(`#form-step-${step}`);
+    if (!fieldset) return false;
 
     const fields = Array.from(
       fieldset.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>("input, select, textarea"),
     );
-    const invalidField = fields.find((field) => !field.checkValidity());
-    if (invalidField) {
-      invalidField.reportValidity();
-      invalidField.focus({ preventScroll: true });
-      return;
+    const stepErrors: Partial<Record<FormFieldName, string>> = {};
+    let invalidField: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | undefined;
+    for (const field of fields) {
+      const message = validationMessage(field);
+      if (!message) continue;
+      stepErrors[field.name as FormFieldName] = message;
+      invalidField ||= field;
     }
 
+    setFieldErrors((current) => {
+      const next = { ...current };
+      for (const field of fields) delete next[field.name as FormFieldName];
+      return { ...next, ...stepErrors };
+    });
+
+    if (invalidField) {
+      invalidField.focus({ preventScroll: true });
+      invalidField.scrollIntoView({ behavior: "smooth", block: "center" });
+      return false;
+    }
+
+    return true;
+  };
+
+  const advanceStep = (nextStep: ApplicationStep) => {
+    if (!validateStep(currentStep)) return;
     setCurrentStep(nextStep);
+  };
+
+  const returnToStep = (previousStep: ApplicationStep) => {
+    setCurrentStep(previousStep);
   };
 
   const showConfirmation = () => {
     const form = formRef.current;
-    if (!form || !form.reportValidity()) return;
+    if (!form) return;
+    for (const step of [1, 2, 3, 4] as const) {
+      if (validateStep(step)) continue;
+      setCurrentStep(step);
+      return;
+    }
     setPayload(payloadFrom(form));
     setSubmitError("");
     setView("confirm");
@@ -104,8 +167,21 @@ export default function ApplicationForm() {
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(payload),
       });
-      const result = await response.json() as { ok?: boolean; submissionId?: string; message?: string };
-      if (!response.ok || !result.ok) throw new Error(result.message || "送信できませんでした。");
+      const result = await response.json() as { ok?: boolean; submissionId?: string; message?: string; field?: string };
+      if (!response.ok || !result.ok) {
+        const field = result.field as FormFieldName | undefined;
+        if (field && fieldDetails[field]) {
+          setFieldErrors((current) => ({ ...current, [field]: result.message || `${fieldDetails[field].label}を確認してください。` }));
+          setCurrentStep(fieldDetails[field].step);
+          setView("input");
+          requestAnimationFrame(() => {
+            scrollToForm();
+            formRef.current?.querySelector<HTMLElement>(`[name="${field}"]`)?.focus({ preventScroll: true });
+          });
+          return;
+        }
+        throw new Error(result.message || "送信できませんでした。");
+      }
       setSubmissionId(result.submissionId || "");
       setView("complete");
       requestAnimationFrame(scrollToForm);
@@ -115,6 +191,17 @@ export default function ApplicationForm() {
       setIsSubmitting(false);
     }
   };
+
+  const clearFieldError = (event: FormEvent<HTMLFormElement>) => {
+    const target = event.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+    const name = target.name as FormFieldName;
+    if (!name || !fieldErrors[name]) return;
+    setFieldErrors((current) => ({ ...current, [name]: undefined }));
+  };
+
+  const fieldError = (name: FormFieldName) => fieldErrors[name]
+    ? <small className="form-field-error" id={`${name}-error`} role="alert">{fieldErrors[name]}</small>
+    : null;
 
   return (
     <section ref={sectionRef} className="application-form section" id="application-form" aria-labelledby="application-title">
@@ -131,7 +218,7 @@ export default function ApplicationForm() {
           <p>初月無料・日中データ無制限 <b>月額2,490円（税抜）</b><small>※2,739円（税込）</small></p>
         </div>
 
-        {view === "input" && <>
+        {view === "input" &&
           <nav className="form-progress" aria-label="入力の進捗状況">
             {steps.map(({ no, short }) => (
               <button
@@ -145,23 +232,24 @@ export default function ApplicationForm() {
                 <span>STEP {no}</span><b>{short}</b>
               </button>
             ))}
-          </nav>
+          </nav>}
 
-          <form ref={formRef} className="application-fields step-form">
-            <input className="form-honeypot" type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" />
+          <form ref={formRef} className="application-fields step-form" hidden={view !== "input"} onInput={clearFieldError} onChange={clearFieldError} noValidate>
             <fieldset id="form-step-1" hidden={currentStep !== 1}>
               <p className="step-form-guide"><span>STEP 1 / 4</span><b>ご利用内容を入力してください</b></p>
               <legend><span>01</span>ご利用内容</legend>
               <div className="form-grid two-columns">
                 <label className="full-width">現在の携帯キャリア<span>必須</span>
-                  <select name="carrier" required defaultValue="">
+                  <select name="carrier" required defaultValue="" aria-invalid={Boolean(fieldErrors.carrier)} aria-describedby={fieldErrors.carrier ? "carrier-error" : undefined}>
                     <option value="" disabled>選択してください</option>
                     <option>docomo</option><option>au</option><option>SoftBank</option>
                     <option>楽天モバイル</option><option>格安SIM・その他</option>
                   </select>
+                  {fieldError("carrier")}
                 </label>
                 <label className="full-width">ご利用予定のスマートフォン<span>必須</span>
-                  <input name="device" type="text" maxLength={80} placeholder="例：iPhone 16 / Google Pixel 9" required />
+                  <input name="device" type="text" maxLength={80} placeholder="例：iPhone 16 / Google Pixel 9" required aria-invalid={Boolean(fieldErrors.device)} aria-describedby={fieldErrors.device ? "device-error" : undefined} />
+                  {fieldError("device")}
                 </label>
               </div>
               <button className="form-next" type="button" onClick={() => advanceStep(2)}><span><small>入力内容を確認して</small>STEP 2へ進む</span><ArrowRight aria-hidden="true" /></button>
@@ -171,13 +259,16 @@ export default function ApplicationForm() {
               <p className="step-form-guide"><span>STEP 2 / 4</span><b>ご契約者さま情報を入力してください</b></p>
               <legend><span>02</span>ご契約者さま情報</legend>
               <div className="form-grid two-columns">
-                <label>姓<span>必須</span><input name="familyName" autoComplete="family-name" type="text" maxLength={40} placeholder="山田" required /></label>
-                <label>名<span>必須</span><input name="givenName" autoComplete="given-name" type="text" maxLength={40} placeholder="太郎" required /></label>
-                <label>セイ（カナ）<span>必須</span><input name="familyNameKana" type="text" maxLength={40} placeholder="ヤマダ" required /></label>
-                <label>メイ（カナ）<span>必須</span><input name="givenNameKana" type="text" maxLength={40} placeholder="タロウ" required /></label>
-                <label className="full-width">生年月日<span>必須</span><input name="birthDate" autoComplete="bday" type="date" required /></label>
+                <label>姓<span>必須</span><input name="familyName" autoComplete="family-name" type="text" maxLength={40} placeholder="山田" required aria-invalid={Boolean(fieldErrors.familyName)} />{fieldError("familyName")}</label>
+                <label>名<span>必須</span><input name="givenName" autoComplete="given-name" type="text" maxLength={40} placeholder="太郎" required aria-invalid={Boolean(fieldErrors.givenName)} />{fieldError("givenName")}</label>
+                <label>セイ（カナ）<span>必須</span><input name="familyNameKana" type="text" maxLength={40} placeholder="ヤマダ" required aria-invalid={Boolean(fieldErrors.familyNameKana)} />{fieldError("familyNameKana")}</label>
+                <label>メイ（カナ）<span>必須</span><input name="givenNameKana" type="text" maxLength={40} placeholder="タロウ" required aria-invalid={Boolean(fieldErrors.givenNameKana)} />{fieldError("givenNameKana")}</label>
+                <label className="full-width">生年月日<span>必須</span><input name="birthDate" autoComplete="bday" type="date" required aria-invalid={Boolean(fieldErrors.birthDate)} />{fieldError("birthDate")}</label>
               </div>
-              <button className="form-next" type="button" onClick={() => advanceStep(3)}><span><small>入力内容を確認して</small>STEP 3へ進む</span><ArrowRight aria-hidden="true" /></button>
+              <div className="form-step-actions">
+                <button className="form-back" type="button" onClick={() => returnToStep(1)}><ArrowLeft aria-hidden="true" /><span>戻る</span></button>
+                <button className="form-next" type="button" onClick={() => advanceStep(3)}><span><small>入力内容を確認して</small>STEP 3へ進む</span><ArrowRight aria-hidden="true" /></button>
+              </div>
             </fieldset>
 
             <fieldset id="form-step-3" hidden={currentStep !== 3}>
@@ -185,33 +276,40 @@ export default function ApplicationForm() {
               <legend><span>03</span>ご住所・ご連絡先</legend>
               <div className="form-grid two-columns">
                 <label>郵便番号<span>必須</span>
-                  <input name="postalCode" autoComplete="postal-code" inputMode="numeric" type="text" placeholder="123-4567" maxLength={8} aria-describedby="postal-help postal-status" required />
+                  <input name="postalCode" autoComplete="postal-code" inputMode="numeric" type="text" placeholder="123-4567" maxLength={8} aria-describedby={fieldErrors.postalCode ? "postal-help postal-status postalCode-error" : "postal-help postal-status"} aria-invalid={Boolean(fieldErrors.postalCode)} required />
                   <small className="postal-help" id="postal-help">ハイフンあり・なし、どちらでも自動検索します</small>
                   <small className="postal-status" id="postal-status" aria-live="polite" />
+                  {fieldError("postalCode")}
                 </label>
                 <label>都道府県<span>必須</span>
-                  <select name="prefecture" autoComplete="address-level1" required defaultValue="">
+                  <select name="prefecture" autoComplete="address-level1" required defaultValue="" aria-invalid={Boolean(fieldErrors.prefecture)}>
                     <option value="" disabled>選択してください</option>
                     {prefectures.map((prefecture) => <option key={prefecture}>{prefecture}</option>)}
                   </select>
+                  {fieldError("prefecture")}
                 </label>
-                <label className="full-width">市区町村・番地<span>必須</span><input name="address" autoComplete="address-line1" type="text" maxLength={120} placeholder="渋谷区〇〇 1-2-3" required /></label>
+                <label className="full-width">市区町村・番地<span>必須</span><input name="address" autoComplete="address-line1" type="text" maxLength={120} placeholder="渋谷区〇〇 1-2-3" required aria-invalid={Boolean(fieldErrors.address)} />{fieldError("address")}</label>
                 <label className="full-width">建物名・部屋番号<span className="optional">任意</span><input name="address2" autoComplete="address-line2" type="text" maxLength={120} placeholder="DUALMOビル 101号室" /></label>
-                <label>電話番号<span>必須</span><input name="tel" autoComplete="tel" inputMode="tel" type="tel" maxLength={14} placeholder="090-1234-5678" required /></label>
-                <label>メールアドレス<span>必須</span><input name="email" autoComplete="email" inputMode="email" type="email" maxLength={160} placeholder="dualmo@example.jp" required /></label>
+                <label>電話番号<span>必須</span><input name="tel" autoComplete="tel" inputMode="tel" type="tel" maxLength={14} placeholder="090-1234-5678" required aria-invalid={Boolean(fieldErrors.tel)} />{fieldError("tel")}</label>
+                <label>メールアドレス<span>必須</span><input name="email" autoComplete="email" inputMode="email" type="email" maxLength={160} placeholder="dualmo@example.jp" required aria-invalid={Boolean(fieldErrors.email)} />{fieldError("email")}</label>
               </div>
-              <button className="form-next" type="button" onClick={() => advanceStep(4)}><span><small>入力内容を確認して</small>STEP 4へ進む</span><ArrowRight aria-hidden="true" /></button>
+              <div className="form-step-actions">
+                <button className="form-back" type="button" onClick={() => returnToStep(2)}><ArrowLeft aria-hidden="true" /><span>戻る</span></button>
+                <button className="form-next" type="button" onClick={() => advanceStep(4)}><span><small>入力内容を確認して</small>STEP 4へ進む</span><ArrowRight aria-hidden="true" /></button>
+              </div>
             </fieldset>
 
             <fieldset className="agreement-fieldset" id="form-step-4" hidden={currentStep !== 4}>
               <p className="step-form-guide"><span>STEP 4 / 4</span><b>お申し込み内容をご確認ください</b></p>
               <legend><span>04</span>ご確認</legend>
-              <label className="agreement-check"><input name="contractConfirmed" type="checkbox" required /><span><strong className="agreement-price">初期費用 0円／初月無料／月額 2,490円（税抜）<small>※2,739円（税込）</small></strong>契約期間24か月、課金開始は発送ベース、解約金は月額料金1か月分であることを確認しました。</span></label>
-              <label className="agreement-check"><input name="policyAgreed" type="checkbox" required /><span><a href="https://terms.012grp.co.jp/terms_pdf/dokoyorimo/dualmo_tac/" target="_blank" rel="noopener noreferrer">利用規約</a>・<a href="https://terms.012grp.co.jp/privacy/dokoyorimo_p/" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>に同意します。</span></label>
-              <button className="form-submit" type="button" onClick={showConfirmation}><span><small>入力内容を確認して</small>確認画面へ進む</span><ArrowRight aria-hidden="true" /></button>
+              <label className="agreement-check"><input name="contractConfirmed" type="checkbox" required aria-invalid={Boolean(fieldErrors.contractConfirmed)} /><span><strong className="agreement-price">初期費用 0円／初月無料／月額 2,490円（税抜）<small>※2,739円（税込）</small></strong>契約期間24か月、課金開始は発送ベース、解約金は月額料金1か月分であることを確認しました。{fieldError("contractConfirmed")}</span></label>
+              <label className="agreement-check"><input name="policyAgreed" type="checkbox" required aria-invalid={Boolean(fieldErrors.policyAgreed)} /><span><a href="https://terms.012grp.co.jp/terms_pdf/dokoyorimo/dualmo_tac/" target="_blank" rel="noopener noreferrer">利用規約</a>・<a href="https://terms.012grp.co.jp/privacy/dokoyorimo_p/" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>に同意します。{fieldError("policyAgreed")}</span></label>
+              <div className="form-step-actions">
+                <button className="form-back" type="button" onClick={() => returnToStep(3)}><ArrowLeft aria-hidden="true" /><span>戻る</span></button>
+                <button className="form-submit" type="button" onClick={showConfirmation}><span><small>入力内容を確認して</small>確認画面へ進む</span><ArrowRight aria-hidden="true" /></button>
+              </div>
             </fieldset>
           </form>
-        </>}
 
         {view === "confirm" && payload && (
           <form className="application-confirmation" onSubmit={submitApplication}>

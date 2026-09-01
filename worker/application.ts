@@ -4,6 +4,33 @@ import type { ApplicationPayload } from "../app/application-types";
 
 const MAX_BODY_BYTES = 32 * 1024;
 type EmailProvider = "resend" | "gmail";
+type ApplicationField = Exclude<keyof ApplicationPayload, "website">;
+
+const applicationFieldLabels: Record<ApplicationField, string> = {
+  carrier: "現在の携帯キャリア",
+  device: "ご利用予定のスマートフォン",
+  familyName: "姓",
+  givenName: "名",
+  familyNameKana: "セイ（カナ）",
+  givenNameKana: "メイ（カナ）",
+  birthDate: "生年月日",
+  postalCode: "郵便番号",
+  prefecture: "都道府県",
+  address: "市区町村・番地",
+  address2: "建物名・部屋番号",
+  tel: "電話番号",
+  email: "メールアドレス",
+};
+
+class ApplicationValidationError extends Error {
+  field: ApplicationField;
+
+  constructor(field: ApplicationField, message: string) {
+    super(message);
+    this.name = "ApplicationValidationError";
+    this.field = field;
+  }
+}
 
 type OutboundEmail = {
   to: string[];
@@ -64,9 +91,14 @@ async function readLimitedJson(request: Request): Promise<unknown> {
 
 function stringField(record: Record<string, unknown>, key: keyof ApplicationPayload, max: number, optional = false): string {
   const value = record[key];
-  if (typeof value !== "string") throw new Error(`INVALID_${String(key).toUpperCase()}`);
+  if (typeof value !== "string") {
+    if (key === "website") throw new Error("INVALID_WEBSITE");
+    throw new ApplicationValidationError(key, `${applicationFieldLabels[key]}を入力してください。`);
+  }
   const normalized = value.trim();
-  if ((!optional && !normalized) || normalized.length > max) throw new Error(`INVALID_${String(key).toUpperCase()}`);
+  if (key !== "website" && !optional && !normalized) throw new ApplicationValidationError(key, `${applicationFieldLabels[key]}を入力してください。`);
+  if (key !== "website" && normalized.length > max) throw new ApplicationValidationError(key, `${applicationFieldLabels[key]}が長すぎます。`);
+  if (key === "website" && normalized.length > max) throw new Error("INVALID_WEBSITE");
   return normalized;
 }
 
@@ -91,10 +123,10 @@ export function validateApplication(value: unknown): ApplicationPayload {
   };
 
   if (payload.website) throw new Error("SPAM_DETECTED");
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(payload.birthDate)) throw new Error("INVALID_BIRTHDATE");
-  if (!/^\d{3}-?\d{4}$/.test(payload.postalCode)) throw new Error("INVALID_POSTALCODE");
-  if (!/^0\d{9,10}$/.test(payload.tel.replace(/-/g, ""))) throw new Error("INVALID_TEL");
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)) throw new Error("INVALID_EMAIL");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(payload.birthDate)) throw new ApplicationValidationError("birthDate", "生年月日を入力してください。");
+  if (!/^\d{3}-?\d{4}$/.test(payload.postalCode)) throw new ApplicationValidationError("postalCode", "郵便番号を7桁で入力してください。");
+  if (!/^0\d{9,10}$/.test(payload.tel.replace(/-/g, ""))) throw new ApplicationValidationError("tel", "電話番号を正しく入力してください。");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)) throw new ApplicationValidationError("email", "メールアドレスを正しく入力してください。");
   return payload;
 }
 
@@ -303,7 +335,10 @@ export async function handleApplicationRequest(request: Request, env?: Applicati
   let payload: ApplicationPayload;
   try {
     payload = validateApplication(await readLimitedJson(request));
-  } catch {
+  } catch (error) {
+    if (error instanceof ApplicationValidationError) {
+      return json({ ok: false, code: "VALIDATION_ERROR", field: error.field, message: error.message }, 400);
+    }
     return json({ ok: false, message: "入力内容をご確認ください。" }, 400);
   }
 

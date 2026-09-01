@@ -140,12 +140,37 @@ test("advances application steps only through validated footer actions", async (
   const form = await readFile(new URL("../app/ApplicationForm.tsx", import.meta.url), "utf8");
   assert.match(form, /const \[currentStep, setCurrentStep\]/);
   assert.match(form, /const advanceStep =/);
-  assert.match(form, /invalidField\.reportValidity\(\)/);
+  assert.match(form, /const message = validationMessage\(field\)/);
+  assert.match(form, /invalidField\.scrollIntoView/);
   assert.match(form, /disabled[\s\S]*?<span>STEP \{no\}<\/span>/);
   assert.match(form, /onClick=\{\(\) => advanceStep\(2\)\}/);
   assert.match(form, /onClick=\{\(\) => advanceStep\(3\)\}/);
   assert.match(form, /onClick=\{\(\) => advanceStep\(4\)\}/);
   assert.doesNotMatch(form, /className="step-toggle"|htmlFor=\{`application-step-/);
+});
+
+test("provides back navigation beside every later-step action", async () => {
+  const form = await readFile(new URL("../app/ApplicationForm.tsx", import.meta.url), "utf8");
+  assert.equal((form.match(/className="form-back"/g) || []).length, 3);
+  assert.match(form, /returnToStep\(1\)/);
+  assert.match(form, /returnToStep\(2\)/);
+  assert.match(form, /returnToStep\(3\)/);
+});
+
+test("blocks invalid steps and returns server validation to the exact field", async () => {
+  const [form, worker, css] = await Promise.all([
+    readFile(new URL("../app/ApplicationForm.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../worker/application.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+  assert.match(form, /const validateStep =/);
+  assert.match(form, /if \(!validateStep\(currentStep\)\) return/);
+  assert.match(form, /className="form-field-error"/);
+  assert.match(form, /setCurrentStep\(fieldDetails\[field\]\.step\)/);
+  assert.match(form, /hidden=\{view !== "input"\}/);
+  assert.doesNotMatch(form, /name="website"/);
+  assert.match(worker, /code: "VALIDATION_ERROR", field: error\.field/);
+  assert.match(css, /\[aria-invalid="true"\]/);
 });
 
 test("uses the current campaign pricing, usage note and legal footer links", async () => {
